@@ -1,0 +1,55 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: gentrace-ingress-{{ .Values.environment }}
+    annotations:
+        ingress.kubernetes.io/enable-cors: "true"
+        {{- if and .Values.gke.enabled .Values.gke.staticIpName }}
+        "kubernetes.io/ingress.global-static-ip-name": {{ quote .Values.gke.staticIpName }}
+        {{- end }}
+        {{- if and .Values.gke.enabled .Values.gke.internalLb }}
+        "kubernetes.io/ingress.class": "gce-internal"
+        {{- end }}
+spec:
+    {{- if and .Values.tls.enabled .Values.tls.certificates }}
+    tls:
+    {{- range .Values.tls.certificates }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+    {{- end }}
+    rules:
+        - host: {{ .Values.app.host }}
+          http:
+              paths:
+                  - path: /api
+                    pathType: ImplementationSpecific
+                    backend:
+                        service:
+                            name: api-service
+                            port:
+                                number: {{ .Values.app.port }}
+                  - path: /api/*
+                    pathType: ImplementationSpecific
+                    backend:
+                        service:
+                            name: api-service
+                            port:
+                                number: {{ .Values.app.port }}
+                  - path: /ws
+                    pathType: ImplementationSpecific
+                    backend:
+                        service:
+                            name: websocket-service
+                            port:
+                                number: {{ .Values.websocketServer.port }}
+                  - path: /*
+                    pathType: ImplementationSpecific
+                    backend:
+                        service:
+                            name: app-service
+                            port:
+                                number: {{ .Values.app.port }}

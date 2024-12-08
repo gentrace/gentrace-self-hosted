@@ -1,0 +1,106 @@
+{{- if and .Values.objectStorage.enabled .Values.objectStorage.useMinio }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: minio
+    labels:
+        app: minio
+spec:
+    serviceName: minio
+    replicas: 1
+    selector:
+        matchLabels:
+            app: minio
+    template:
+        metadata:
+            labels:
+                app: minio
+        spec:
+            containers:
+                - name: minio
+                  image: "{{ .Values.objectStorage.minio.image }}:{{ .Values.objectStorage.minio.version }}"
+                  command:
+                    - /bin/sh
+                    - -c
+                    - minio server /data --console-address ":{{ .Values.objectStorage.minio.ports.console }}"
+                  ports:
+                    - name: api
+                      containerPort: {{ .Values.objectStorage.minio.ports.api }}
+                    - name: console
+                      containerPort: {{ .Values.objectStorage.minio.ports.console }}
+                  env:
+                    - name: MINIO_ROOT_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: {{ .Values.secrets.objectStorage.name }}
+                          key: STORAGE_ACCESS_KEY_ID
+                    - name: MINIO_ROOT_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: {{ .Values.secrets.objectStorage.name }}
+                          key: STORAGE_SECRET_ACCESS_KEY
+                    - name: STORAGE_BUCKET
+                      valueFrom:
+                        secretKeyRef:
+                          name: {{ .Values.secrets.objectStorage.name }}
+                          key: STORAGE_BUCKET
+                  volumeMounts:
+                    - name: data
+                      mountPath: /data
+                  lifecycle:
+                    postStart:
+                      exec:
+                        command:
+                          - /bin/sh
+                          - -c
+                          - |
+                            # Configure mc client
+                            echo "Starting MinIO client configuration..."
+                            mc alias set myminio http://localhost:{{ .Values.objectStorage.minio.ports.api }} "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
+                            echo "MinIO client configuration completed"
+
+                            # Create bucket if it doesn't exist
+                            if ! mc ls myminio/$STORAGE_BUCKET > /dev/null 2>&1; then
+                              mc mb myminio/$STORAGE_BUCKET
+                              echo "Bucket $STORAGE_BUCKET created successfully"
+                            else
+                              echo "Bucket $STORAGE_BUCKET already exists"
+                            fi
+                  livenessProbe:
+                    httpGet:
+                        path: /minio/health/live
+                        port: api
+                    initialDelaySeconds: 30
+                    periodSeconds: 30
+                    timeoutSeconds: 20
+                    failureThreshold: 3
+                  readinessProbe:
+                    httpGet:
+                        path: /minio/health/live
+                        port: api
+                    initialDelaySeconds: 30
+                    periodSeconds: 30
+                    timeoutSeconds: 20
+                    failureThreshold: 3
+                  resources:
+                    {{- toYaml .Values.objectStorage.minio.resources | nindent 20 }}
+            {{- if .Values.objectStorage.minio.storage.useExistingPVC }}
+            volumes:
+                - name: data
+                  persistentVolumeClaim:
+                    claimName: {{ .Values.objectStorage.minio.storage.existingPVCName }}
+            {{- end }}
+    {{- if not .Values.objectStorage.minio.storage.useExistingPVC }}
+    volumeClaimTemplates:
+        - metadata:
+              name: data
+          spec:
+              accessModes: ["ReadWriteOnce"]
+              {{- if .Values.objectStorage.minio.storage.storageClass }}
+              storageClassName: {{ .Values.objectStorage.minio.storage.storageClass }}
+              {{- end }}
+              resources:
+                  requests:
+                      storage: {{ .Values.objectStorage.minio.storage.size }}
+    {{- end }}
+{{- end }} 

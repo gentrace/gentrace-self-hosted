@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: kafka-connect-config
+data:
+    standalone.properties: |
+        bootstrap.servers=kafka:{{ .Values.kafka.port }}
+
+        key.converter=org.apache.kafka.connect.json.JsonConverter
+        value.converter=org.apache.kafka.connect.json.JsonConverter
+        key.converter.schemas.enable=true
+        value.converter.schemas.enable=true
+
+        fetch.min.bytes=1000000
+        fetch.max.wait.ms=3000
+
+        consumer.max.poll.records=5000
+        consumer.max.partition.fetch.bytes=5242880
+
+        offset.storage.file.filename=/tmp/connect.offsets
+        offset.flush.interval.ms=10000
+
+        plugin.path=/usr/share/java/kafka-connect-plugins/lib
+
+    clickhouse-raw.properties: |
+        name=gentrace_clickhouse_connector
+        connector.class=com.clickhouse.kafka.connect.ClickHouseSinkConnector
+        tasks.max=1
+        topics=data
+        hostname=clickhouse
+        database=default
+        username=${CLICKHOUSE_USER}
+        password=${CLICKHOUSE_PASSWORD}
+        port={{ .Values.clickhouse.httpPort }}
+        value.converter.schemas.enable=false
+        value.converter=org.apache.kafka.connect.json.JsonConverter
+        exactlyOnce=false
+        schemas.enable=false
+        clickhouseSettings=date_time_input_format=best_effort

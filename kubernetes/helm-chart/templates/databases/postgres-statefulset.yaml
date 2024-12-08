@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: postgres
+    labels:
+        app: postgres
+spec:
+    serviceName: postgres
+    replicas: 1
+    selector:
+        matchLabels:
+            app: postgres
+    template:
+        metadata:
+            labels:
+                app: postgres
+        spec:
+            securityContext:
+                fsGroup: 999
+            containers:
+                - name: postgres
+                  image: "{{ .Values.postgres.image }}:{{ .Values.postgres.version }}"
+                  env:
+                      - name: POSTGRES_DB
+                        valueFrom:
+                          secretKeyRef:
+                            name: {{ .Values.secrets.postgres.name }}
+                            key: POSTGRES_DB
+                      - name: POSTGRES_USER
+                        valueFrom:
+                          secretKeyRef:
+                            name: {{ .Values.secrets.postgres.name }}
+                            key: POSTGRES_USER
+                      - name: POSTGRES_PASSWORD
+                        valueFrom:
+                          secretKeyRef:
+                            name: {{ .Values.secrets.postgres.name }}
+                            key: POSTGRES_PASSWORD
+                  ports:
+                      - name: postgresql
+                        containerPort: {{ .Values.postgres.port }}
+                  volumeMounts:
+                      - name: data
+                        mountPath: /var/lib/postgresql/data
+                        subPath: pgdata
+                  readinessProbe:
+                      tcpSocket:
+                          port: {{ .Values.postgres.port }}
+                      initialDelaySeconds: 10
+                      periodSeconds: 10
+                  livenessProbe:
+                      tcpSocket:
+                          port: {{ .Values.postgres.port }}
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                  securityContext:
+                    allowPrivilegeEscalation: false
+            {{- if .Values.postgres.storage.useExistingPVC }}
+            volumes:
+                - name: data
+                  persistentVolumeClaim:
+                    claimName: {{ .Values.postgres.storage.existingPVCName }}
+            {{- end }}
+    {{- if not .Values.postgres.storage.useExistingPVC }}
+    volumeClaimTemplates:
+        - metadata:
+              name: data
+          spec:
+              accessModes: ["ReadWriteOnce"]
+              {{- if .Values.postgres.storage.storageClass }}
+              storageClassName: {{ .Values.postgres.storage.storageClass }}
+              {{- end }}
+              resources:
+                  requests:
+                      storage: {{ .Values.postgres.storage.size }}
+    {{- end }}

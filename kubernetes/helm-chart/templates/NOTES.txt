@@ -1,0 +1,1 @@
+Deployed the Gentrace Helm application successfully!

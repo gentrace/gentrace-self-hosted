@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: clickhouse
+    labels:
+        app: clickhouse
+spec:
+    serviceName: clickhouse
+    replicas: 1
+    selector:
+        matchLabels:
+            app: clickhouse
+    template:
+        metadata:
+            labels:
+                app: clickhouse
+        spec:
+            containers:
+                - name: clickhouse
+                  image: "{{ .Values.clickhouse.image }}:{{ .Values.clickhouse.version }}"
+                  env:
+                      - name: CLICKHOUSE_USER
+                        valueFrom:
+                          secretKeyRef:
+                            name: {{ .Values.secrets.clickhouse.name }}
+                            key: CLICKHOUSE_USER
+                      - name: CLICKHOUSE_PASSWORD
+                        valueFrom:
+                          secretKeyRef:
+                            name: {{ .Values.secrets.clickhouse.name }}
+                            key: CLICKHOUSE_PASSWORD
+                  ports:
+                      - name: http
+                        containerPort: {{ .Values.clickhouse.httpPort }}
+                      - name: native
+                        containerPort: {{ .Values.clickhouse.tcpPort }}
+                  volumeMounts:
+                      - name: data
+                        mountPath: /var/lib/clickhouse
+                      # TODO: Bring this back at some point, was causing issues 
+                      # - name: config
+                      #   # Path in the conatiner the file is mounted to
+                      #   mountPath: /etc/clickhouse-server/users.d/user.xml
+                      #   # Path in the defined volume that the file maps to
+                      #   subPath: user.xml
+                  readinessProbe:
+                      tcpSocket:
+                          port: {{ .Values.clickhouse.tcpPort }}
+                      initialDelaySeconds: 10
+                      periodSeconds: 10
+                  livenessProbe:
+                      tcpSocket:
+                          port: {{ .Values.clickhouse.tcpPort }}
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+            volumes:
+                - name: config
+                  configMap:
+                    name: clickhouse-config
+                    items:
+                      # Corrected key name to match ConfigMap
+                      - key: user.xml
+                        path: user.xml
+                {{- if .Values.clickhouse.storage.useExistingPVC }}
+                - name: data
+                  persistentVolumeClaim:
+                    claimName: {{ .Values.clickhouse.storage.existingPVCName }}
+                {{- end }}
+    {{- if not .Values.clickhouse.storage.useExistingPVC }}
+    volumeClaimTemplates:
+        - metadata:
+              name: data
+          spec:
+              accessModes: ["ReadWriteOnce"]
+              {{- if .Values.clickhouse.storage.storageClass }}
+              storageClassName: {{ .Values.clickhouse.storage.storageClass }}
+              {{- end }}
+              resources:
+                  requests:
+                      storage: {{ .Values.clickhouse.storage.size }}
+    {{- end }}

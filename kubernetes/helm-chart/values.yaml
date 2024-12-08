@@ -1,0 +1,217 @@
+# IMPORTANT: Please read the README.txt file for storage class configuration requirements
+# before deploying this Helm chart. Proper storage class setup is required for database persistence.
+
+environment: prod
+nodeEnvValue: production
+
+app:
+    name: app
+    host: "self-hosted.gentrace.ai"
+    port: 3000
+    log_level: info
+    image: quay.io/gentrace/app
+    version: staging
+    replicaCount: 1
+
+api:
+    name: api
+    host: "self-hosted.gentrace.ai"
+    port: 3000
+    log_level: info
+    # Needs to be the same as the app image
+    image: quay.io/gentrace/app
+    version: staging
+    replicaCount: 1
+
+websocketServer:
+    name: websocket-server
+    host: "self-hosted.gentrace.ai"
+    port: 3001
+    log_level: info
+    image: quay.io/gentrace/websocket-server
+    version: staging
+    replicaCount: 1
+
+taskrunner:
+    name: taskrunner
+    host: "self-hosted.gentrace.ai"
+    log_level: info
+    image: quay.io/gentrace/taskrunner
+    version: staging
+    replicaCount: 1
+
+taskscheduler:
+    name: taskscheduler
+    host: "self-hosted.gentrace.ai"
+    log_level: info
+    replicaCount: 1
+    image: quay.io/gentrace/taskscheduler
+    version: staging
+
+# Used as an init container to run migrations before the app container runs
+runMigrations:
+    name: run-migrations
+    image: quay.io/gentrace/run-migrations
+    version: staging
+
+# Secret reference names
+secrets:
+    admin:
+        name: admin-credentials
+    postgres:
+        name: postgres-credentials
+    clickhouse:
+        name: clickhouse-credentials
+    kafka:
+        name: kafka-credentials
+    jwt:
+        name: jwt-secret
+    objectStorage:
+        name: object-storage-credentials
+    prismaFieldEncryption:
+        name: prisma-field-encryption-secret
+
+# Database configurations
+postgres:
+    enabled: true
+    image: postgres
+    version: "15.3"
+    storage:
+        size: 10Gi
+        storageClass: "" # Use cluster default if not specified
+        useExistingPVC: false # Set to true to use existing PVC
+        existingPVCName: "" # Name of existing PVC to use
+    port: 5432
+    resources:
+        requests:
+            memory: "1Gi"
+            cpu: "500m"
+        limits:
+            memory: "2Gi"
+            cpu: "1000m"
+
+clickhouse:
+    enabled: true
+    image: clickhouse/clickhouse-server
+    version: "23.8"
+    storage:
+        size: 10Gi
+        storageClass: "" # Use cluster default if not specified
+        useExistingPVC: false
+        existingPVCName: ""
+    httpPort: 8123
+    tcpPort: 9000
+    resources:
+        requests:
+            memory: "2Gi"
+            cpu: "1000m"
+        limits:
+            memory: "4Gi"
+            cpu: "2000m"
+
+kafka:
+    enabled: true
+    image: confluentinc/cp-kafka
+    version: "7.4.4"
+    clusterId: "vB47RqlhSd-P3ghRgNkWpQ"
+    storage:
+        size: 10Gi
+        storageClass: "" # Use cluster default if not specified
+        useExistingPVC: false
+        existingPVCName: ""
+    port: 9092
+    resources:
+        requests:
+            memory: "1Gi"
+            cpu: "500m"
+        limits:
+            memory: "2Gi"
+            cpu: "1000m"
+
+    # Add this new section for Kafka Connect
+    connect:
+        enabled: true
+        image: confluentinc/cp-kafka-connect
+        version: "7.4.4"
+        port: 8083
+        resources:
+            requests:
+                memory: "1Gi"
+                cpu: "500m"
+            limits:
+                memory: "2Gi"
+                cpu: "1000m"
+        config:
+            groupId: "kafka-connect-group"
+            configStorageTopic: "connect-configs"
+            offsetStorageTopic: "connect-offsets"
+            statusStorageTopic: "connect-status"
+            keyConverter: "org.apache.kafka.connect.json.JsonConverter"
+            valueConverter: "org.apache.kafka.connect.json.JsonConverter"
+            pluginPath: "/usr/share/java/kafka-connect-plugins"
+            clickhouse:
+                name: "gentrace_clickhouse_connector"
+                tasksMax: 1
+                topics: "data"
+                database: "default"
+                exactlyOnce: false
+                username: "default"
+        clickhouseConnector:
+            version: "v1.0.17"
+            url: "https://github.com/ClickHouse/clickhouse-kafka-connect/releases/download/v1.0.17/clickhouse-kafka-connect-v1.0.17.zip"
+
+    ui:
+        enabled: true
+        port: 8080
+        image: provectuslabs/kafka-ui
+        version: latest
+
+image:
+    pullPolicy: Always
+    pullSecretName: "gentrace-gentracebot-pull-secret"
+
+
+objectStorage:
+    enabled: true
+    # Whether to use internal MinIO deployment or external S3-compatible service
+    useMinio: true
+    # MinIO configuration (used when useMinio is true)
+    minio:
+        image: minio/minio
+        version: latest
+        storage:
+            size: 10Gi
+            storageClass: "" # Use cluster default if not specified
+            useExistingPVC: false
+            existingPVCName: ""
+        ports:
+            api: 9000
+            console: 9001
+        resources:
+            requests:
+                memory: "1Gi"
+                cpu: "500m"
+            limits:
+                memory: "2Gi"
+                cpu: "1000m"
+
+# GKE-specific configuration
+gke:
+  # -- Enable GKE-specific features
+  enabled: true
+  # -- Name of your static IP in GKE (only used if gke.enabled is true)
+  staticIpName: "gentrace-self-hosted-test-1"
+  # -- Whether to use an internal load balancer for GKE
+  internalLb: false
+
+# TLS configuration for ingress
+tls:
+  # -- Enable TLS for ingress
+  enabled: false
+  # -- List of TLS certificates to use
+  certificates:
+    # -- Default certificate
+    - secretName: ""
+      hosts: []
+      # Example:
+      # - example.gentrace.ai

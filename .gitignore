@@ -1,0 +1,28 @@
+# Helm package files
+*.tgz
+
+# Generated helm files
+values.local.yaml
+values.override.yaml
+
+# Helm test files
+__snapshot__/
+__snapshots__/
+
+# Helm release files
+.release/
+
+# Helm generated documentation
+*.md.bak
+
+# Local development values
+values.dev.yaml
+values.local.yaml
+
+# Helm secrets
+secrets/
+*secret*.yaml
+*secrets*.yaml
+
+# Temporary files
+.helm/

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: websocket-server
+  labels:
+    app: {{ .Values.websocketServer.name }}
+spec:
+  replicas: {{ .Values.websocketServer.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 100%
+  selector:
+    matchLabels:
+      app: websocket-server
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.websocketServer.name }}
+    spec:
+      imagePullSecrets:
+      - name: {{ .Values.image.pullSecretName }}
+      containers:
+      - name: websocket-server
+        image: "{{ .Values.websocketServer.image }}:{{ .Values.websocketServer.version }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: PUBLIC_HOSTNAME
+          value: {{ .Values.websocketServer.host | quote }}
+        - name: PORT
+          value: {{ .Values.websocketServer.port | quote }}
+        - name: NODE_ENV
+          value: {{ .Values.nodeEnvValue }}
+        - name: ENVIRONMENT
+          value: {{ .Values.environment }}
+        # In case certain Next-specific code paths are hit in the taskrunner
+        - name: NEXT_PUBLIC_SELF_HOSTED
+          value: "true"
+        - name: NEXT_PUBLIC_SELF_HOSTED_TLS
+          value: {{ .Values.tls.enabled | quote }}
+        envFrom:
+          - secretRef:
+              name: {{ .Values.secrets.postgres.name }}
+          - secretRef:
+              name: {{ .Values.secrets.clickhouse.name }}
+          - secretRef:
+              name: {{ .Values.secrets.jwt.name }}
+          - secretRef:
+              name: {{ .Values.secrets.kafka.name }}
+          - secretRef:
+              name: {{ .Values.secrets.objectStorage.name }}
+          - secretRef:
+              name: {{ .Values.secrets.prismaFieldEncryption.name }}
+        ports:
+        - containerPort: {{ .Values.websocketServer.port }}
+        livenessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          tcpSocket:
+            port: {{ .Values.websocketServer.port }}
+        readinessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: {{ .Values.websocketServer.port }}
+        lifecycle:
+          preStop:
+            exec:
+              # if SIGTERM triggers a quick exit; keep serving traffic instead
+              command: ["sleep","60"]
+      terminationGracePeriodSeconds: 120

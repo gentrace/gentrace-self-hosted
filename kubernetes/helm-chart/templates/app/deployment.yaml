@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: {{ .Values.app.name }}
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 100%
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}
+    spec:
+      imagePullSecrets:
+      - name: {{ .Values.image.pullSecretName }}
+      initContainers:
+      - name: run-migrations
+        image: {{ .Values.runMigrations.image }}:{{ .Values.runMigrations.version }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ['/bin/sh', '-c']
+        args:
+          - |
+            echo "Running Clickhouse and Postgres migrations + seeding admin..."
+            npm run self-hosted:migrate-and-seed
+        envFrom:
+          - secretRef:
+              name: {{ .Values.secrets.postgres.name }}
+          - secretRef:
+              name: {{ .Values.secrets.clickhouse.name }}
+        env:
+        - name: NODE_ENV
+          value: {{ .Values.nodeEnvValue }}
+        - name: ENVIRONMENT
+          value: {{ .Values.environment }}
+        - name: ADMIN_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: admin-credentials
+              key: email
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: admin-credentials
+              key: password
+      containers:
+      - name: app
+        image: "{{ .Values.app.image }}:{{ .Values.app.version }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: PUBLIC_HOSTNAME
+          value: {{ .Values.app.host | quote }}
+        - name: PORT
+          value: {{ .Values.app.port | quote }}
+        - name: NODE_ENV
+          value: {{ .Values.nodeEnvValue }}
+        - name: ENVIRONMENT
+          value: {{ .Values.environment }}
+        # Should already be true but ensuring this nonetheless
+        - name: NEXT_PUBLIC_SELF_HOSTED
+          value: "true"
+        - name: NEXT_PUBLIC_SELF_HOSTED_TLS
+          value: {{ .Values.tls.enabled | quote }}
+        - name: NEXT_OTEL_VERBOSE
+          value: "1"
+        envFrom:
+          - secretRef:
+              name: {{ .Values.secrets.postgres.name }}
+          - secretRef:
+              name: {{ .Values.secrets.clickhouse.name }}
+          - secretRef:
+              name: {{ .Values.secrets.jwt.name }}
+          - secretRef:
+              name: {{ .Values.secrets.kafka.name }}
+          - secretRef:
+              name: {{ .Values.secrets.objectStorage.name }}
+          - secretRef:
+              name: {{ .Values.secrets.prismaFieldEncryption.name }}
+        ports:
+        - containerPort: {{ .Values.app.port }}
+        livenessProbe:
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          httpGet:
+            path: '/'
+            port: {{ .Values.app.port }}
+        readinessProbe:
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          httpGet:
+            path: '/'
+            port: {{ .Values.app.port }}
+        resources:
+          requests:
+            cpu: "1"
+        lifecycle:
+          preStop:
+            exec:
+              # if SIGTERM triggers a quick exit; keep serving traffic instead
+              command: ["sleep","60"]
+      terminationGracePeriodSeconds: 120
