@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  name: admin-credentials
-type: Opaque
-stringData:
-  email: "admin@yourdomain.com"
-  name: "Admin User"
-  password: "your-secure-admin-password"
