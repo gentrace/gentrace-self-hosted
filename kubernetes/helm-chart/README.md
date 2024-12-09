@@ -18,6 +18,16 @@ allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
 ```
 
+# Istio Configuration
+
+If you're using Istio service mesh, enable automatic sidecar injection for the default namespace before deploying:
+
+```bash
+kubectl label namespace default istio-injection=enabled
+```
+
+This will ensure all pods deployed by this Helm chart are automatically injected with Istio sidecars.
+
 # Database Credentials Configuration
 
 ## ClickHouse Credentials
@@ -52,11 +62,13 @@ stringData:
 ```
 
 2. Apply the secret:
+
 ```bash
 kubectl apply -f clickhouse-secret.yaml
 ```
 
 3. Update your values.yaml to reference the secret:
+
 ```yaml
 secrets:
   clickhouse:
@@ -83,11 +95,13 @@ stringData:
 ```
 
 2. Apply the secret:
+
 ```bash
 kubectl apply -f postgres-secret.yaml
 ```
 
 3. Update your values.yaml to reference the secret:
+
 ```yaml
 secrets:
   postgres:
@@ -118,11 +132,13 @@ stringData:
 ```
 
 2. Apply the secret:
+
 ```bash
 kubectl apply -f kafka-secret.yaml
 ```
 
 3. Update your values.yaml to reference the secret:
+
 ```yaml
 secrets:
   kafka:
@@ -148,11 +164,13 @@ stringData:
 ```
 
 2. Apply the secret:
+
 ```bash
 kubectl apply -f object-storage-secret.yaml
 ```
 
 3. Update your values.yaml to reference the secret:
+
 ```yaml
 secrets:
   object-storage:

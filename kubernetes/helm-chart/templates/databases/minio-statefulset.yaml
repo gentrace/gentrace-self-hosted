@@ -15,6 +15,13 @@ spec:
         metadata:
             labels:
                 app: minio
+            {{- if .Values.istio.enabled }}
+            annotations:
+                sidecar.istio.io/inject: {{ .Values.istio.injection | quote }}
+                {{- with .Values.istio.annotations }}
+                {{- toYaml . | nindent 16 }}
+                {{- end }}
+            {{- end }}
         spec:
             containers:
                 - name: minio
