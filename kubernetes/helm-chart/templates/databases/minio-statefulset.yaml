@@ -73,6 +73,10 @@ spec:
                             else
                               echo "Bucket $STORAGE_BUCKET already exists"
                             fi
+
+                            # Set bucket to public access
+                            mc anonymous set public myminio/$STORAGE_BUCKET
+                            echo "Set bucket $STORAGE_BUCKET to public access"
                   livenessProbe:
                     httpGet:
                         path: /minio/health/live

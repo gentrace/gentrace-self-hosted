@@ -20,13 +20,40 @@ volumeBindingMode: WaitForFirstConsumer
 
 # Istio Configuration
 
-If you're using Istio service mesh, enable automatic sidecar injection for the default namespace before deploying:
+Before deploying this Helm chart, you'll need to install and configure Istio. Follow these steps:
+
+1. Install Istioctl by following the [official Istio getting started guide](https://istio.io/latest/docs/setup/getting-started/). You can download and install it using:
+
+```bash
+curl -L https://istio.io/downloadIstio | sh -
+cd istio-*
+export PATH=$PWD/bin:$PATH
+```
+
+2. Install Istio with the demo profile to get helpful utilities like Kiali for visualizing your service mesh:
+
+```bash
+istioctl install --set profile=demo
+```
+
+3. Enable automatic sidecar injection for the namespace that you've deployed the Gentrace chart into:
 
 ```bash
 kubectl label namespace default istio-injection=enabled
 ```
 
-This will ensure all pods deployed by this Helm chart are automatically injected with Istio sidecars.
+The demo profile includes several useful tools:
+
+- Kiali: Service mesh observability dashboard
+- Prometheus: Metrics collection
+- Grafana: Metrics visualization
+- Jaeger: Distributed tracing
+
+You can access the Kiali dashboard using:
+
+```bash
+istioctl dashboard kiali
+```
 
 # Database Credentials Configuration
 
