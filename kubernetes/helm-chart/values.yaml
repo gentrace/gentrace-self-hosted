@@ -218,8 +218,8 @@ tls:
 # Istio configuration
 istio:
   # -- Enable Istio integration
-  enabled: false
+  enabled: true
   # -- Istio injection label value
-  injection: enabled
+  injection: "true"
   # -- Additional Istio annotations
   annotations: {}
