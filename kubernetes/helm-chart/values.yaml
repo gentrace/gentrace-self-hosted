@@ -113,6 +113,8 @@ kafka:
   enabled: true
   image: confluentinc/cp-kafka
   version: "7.4.4"
+  # This cluster ID was generated using `kafka-storage.sh random-uuid``
+  # See: https://kafka.apache.org/documentation/#kraft
   clusterId: "vB47RqlhSd-P3ghRgNkWpQ"
   storage:
     size: 10Gi
