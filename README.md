@@ -1,5 +1,7 @@
 # Gentrace Self-Hosted Deployment Options
 
+Quick test
+
 This repository contains multiple deployment options for self-hosting Gentrace. Each option is designed to accommodate different infrastructure requirements and preferences.
 
 ## Available Deployment Methods
