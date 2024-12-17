@@ -6,7 +6,7 @@ nodeEnvValue: production
 
 app:
   name: app
-  host: "self-hosted.gentrace.ai"
+  host: "self-hosted.your-domain.com"
   port: 3000
   log_level: info
   image: quay.io/gentrace/app
@@ -15,7 +15,7 @@ app:
 
 api:
   name: api
-  host: "self-hosted.gentrace.ai"
+  host: "self-hosted.your-domain.com"
   port: 3000
   log_level: info
   # Needs to be the same as the app image
@@ -25,7 +25,7 @@ api:
 
 websocketServer:
   name: websocket-server
-  host: "self-hosted.gentrace.ai"
+  host: "self-hosted.your-domain.com"
   port: 3001
   log_level: info
   image: quay.io/gentrace/websocket-server
@@ -34,7 +34,7 @@ websocketServer:
 
 taskrunner:
   name: taskrunner
-  host: "self-hosted.gentrace.ai"
+  host: "self-hosted.your-domain.com"
   log_level: info
   image: quay.io/gentrace/taskrunner
   version: staging
@@ -42,7 +42,7 @@ taskrunner:
 
 taskscheduler:
   name: taskscheduler
-  host: "self-hosted.gentrace.ai"
+  host: "self-hosted.your-domain.com"
   log_level: info
   replicaCount: 1
   image: quay.io/gentrace/taskscheduler
@@ -215,7 +215,7 @@ tls:
     - secretName: ""
       hosts: []
       # Example:
-      # - example.gentrace.ai
+      # - example.your-domain.com
 
 # Istio configuration
 istio:
