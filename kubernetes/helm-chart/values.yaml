@@ -10,7 +10,7 @@ app:
   port: 3000
   log_level: info
   image: quay.io/gentrace/app
-  version: staging
+  version: production
   replicaCount: 1
 
 api:
@@ -20,7 +20,7 @@ api:
   log_level: info
   # Needs to be the same as the app image
   image: quay.io/gentrace/app
-  version: staging
+  version: production
   replicaCount: 1
 
 websocketServer:
@@ -29,7 +29,7 @@ websocketServer:
   port: 3001
   log_level: info
   image: quay.io/gentrace/websocket-server
-  version: staging
+  version: production
   replicaCount: 1
 
 taskrunner:
@@ -37,7 +37,7 @@ taskrunner:
   host: "self-hosted.your-domain.com"
   log_level: info
   image: quay.io/gentrace/taskrunner
-  version: staging
+  version: production
   replicaCount: 1
 
 taskscheduler:
@@ -46,13 +46,13 @@ taskscheduler:
   log_level: info
   replicaCount: 1
   image: quay.io/gentrace/taskscheduler
-  version: staging
+  version: production
 
 # Used as an init container to run migrations before the app container runs
 runMigrations:
   name: run-migrations
   image: quay.io/gentrace/run-migrations
-  version: staging
+  version: production
 
 # Secret reference names
 secrets:

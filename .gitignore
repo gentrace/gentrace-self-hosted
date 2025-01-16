@@ -26,3 +26,8 @@ secrets/
 
 # Temporary files
 .helm/
+
+.DS_Store
+
+all-secrets.yaml
+quay-image-pull-secret.yaml
