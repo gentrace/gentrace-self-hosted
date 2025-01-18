@@ -32,7 +32,7 @@ spec:
       - name: websocket-server
         image: "{{ .Values.websocketServer.image }}:{{ .Values.websocketServer.version }}"
         command: ["/entrypoint.sh"]
-        args: ["websocket-server"]
+        args: ["websocket"]
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: PUBLIC_HOSTNAME
