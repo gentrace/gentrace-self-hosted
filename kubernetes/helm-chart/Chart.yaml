@@ -1,6 +1,0 @@
-apiVersion: v2
-name: gentrace-self-hosted
-description: A Helm chart to deploy Gentrace's infrastructure for self-hosted environments
-type: application
-version: 0.0.1
-appVersion: "0.0.1"
