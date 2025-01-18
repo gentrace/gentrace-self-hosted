@@ -60,6 +60,8 @@ spec:
       containers:
       - name: app
         image: "{{ .Values.app.image }}:{{ .Values.app.version }}"
+        command: ["/entrypoint.sh"]
+        args: ["app"]
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: PUBLIC_HOSTNAME

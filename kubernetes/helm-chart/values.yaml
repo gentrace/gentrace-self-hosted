@@ -9,7 +9,7 @@ app:
   host: "self-hosted.your-domain.com"
   port: 3000
   log_level: info
-  image: quay.io/gentrace/app
+  image: quay.io/gentrace/core
   version: production
   replicaCount: 1
 
@@ -18,8 +18,7 @@ api:
   host: "self-hosted.your-domain.com"
   port: 3000
   log_level: info
-  # Needs to be the same as the app image
-  image: quay.io/gentrace/app
+  image: quay.io/gentrace/core
   version: production
   replicaCount: 1
 
@@ -28,7 +27,7 @@ websocketServer:
   host: "self-hosted.your-domain.com"
   port: 3001
   log_level: info
-  image: quay.io/gentrace/websocket-server
+  image: quay.io/gentrace/core
   version: production
   replicaCount: 1
 
@@ -36,7 +35,7 @@ taskrunner:
   name: taskrunner
   host: "self-hosted.your-domain.com"
   log_level: info
-  image: quay.io/gentrace/taskrunner
+  image: quay.io/gentrace/core
   version: production
   replicaCount: 1
 
@@ -45,7 +44,7 @@ taskscheduler:
   host: "self-hosted.your-domain.com"
   log_level: info
   replicaCount: 1
-  image: quay.io/gentrace/taskscheduler
+  image: quay.io/gentrace/core
   version: production
 
 # Used as an init container to run migrations before the app container runs

@@ -31,6 +31,8 @@ spec:
       containers:
       - name: app
         image: "{{ .Values.taskrunner.image }}:{{ .Values.taskrunner.version }}"
+        command: ["/entrypoint.sh"]
+        args: ["taskrunner"]
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: PUBLIC_HOSTNAME
