@@ -30,7 +30,7 @@ spec:
       - name: {{ .Values.image.pullSecretName }}
       initContainers:
       - name: run-migrations
-        image: {{ .Values.runMigrations.image }}:{{ .Values.runMigrations.version }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ['/bin/sh', '-c']
         args:
@@ -59,7 +59,7 @@ spec:
               key: password
       containers:
       - name: app
-        image: "{{ .Values.app.image }}:{{ .Values.app.version }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.version }}"
         command: ["/entrypoint.sh"]
         args: ["app"]
         imagePullPolicy: {{ .Values.image.pullPolicy }}

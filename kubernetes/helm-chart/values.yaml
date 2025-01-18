@@ -4,13 +4,18 @@
 environment: prod
 nodeEnvValue: production
 
+# Global image configuration for core services
+image:
+  repository: quay.io/gentrace/core
+  version: production
+  pullPolicy: Always
+  pullSecretName: "gentrace-gentracebot-pull-secret"
+
 app:
   name: app
   host: "self-hosted.your-domain.com"
   port: 3000
   log_level: info
-  image: quay.io/gentrace/core
-  version: production
   replicaCount: 1
 
 api:
@@ -18,8 +23,6 @@ api:
   host: "self-hosted.your-domain.com"
   port: 3000
   log_level: info
-  image: quay.io/gentrace/core
-  version: production
   replicaCount: 1
 
 websocketServer:
@@ -27,16 +30,12 @@ websocketServer:
   host: "self-hosted.your-domain.com"
   port: 3001
   log_level: info
-  image: quay.io/gentrace/core
-  version: production
   replicaCount: 1
 
 taskrunner:
   name: taskrunner
   host: "self-hosted.your-domain.com"
   log_level: info
-  image: quay.io/gentrace/core
-  version: production
   replicaCount: 1
 
 taskscheduler:
@@ -44,14 +43,6 @@ taskscheduler:
   host: "self-hosted.your-domain.com"
   log_level: info
   replicaCount: 1
-  image: quay.io/gentrace/core
-  version: production
-
-# Used as an init container to run migrations before the app container runs
-runMigrations:
-  name: run-migrations
-  image: quay.io/gentrace/run-migrations
-  version: production
 
 # Secret reference names
 secrets:
@@ -166,10 +157,6 @@ kafka:
     port: 8080
     image: provectuslabs/kafka-ui
     version: latest
-
-image:
-  pullPolicy: Always
-  pullSecretName: "gentrace-gentracebot-pull-secret"
 
 objectStorage:
   enabled: true
