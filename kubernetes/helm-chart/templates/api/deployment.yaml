@@ -30,7 +30,7 @@ spec:
       - name: {{ .Values.image.pullSecretName }}
       containers:
       - name: app
-        image: "{{ .Values.api.image }}:{{ .Values.api.version }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.version }}"
         command: ["/entrypoint.sh"]
         args: ["api"]
         imagePullPolicy: {{ .Values.image.pullPolicy }}

@@ -59,7 +59,7 @@ spec:
               key: password
       containers:
       - name: app
-        image: "{{ .Values.app.image }}:{{ .Values.app.version }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.version }}"
         command: ["/entrypoint.sh"]
         args: ["app"]
         imagePullPolicy: {{ .Values.image.pullPolicy }}
