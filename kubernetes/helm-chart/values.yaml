@@ -44,12 +44,6 @@ taskscheduler:
   log_level: info
   replicaCount: 1
 
-# Used as an init container to run migrations before the app container runs
-runMigrations:
-  name: run-migrations
-  image: quay.io/gentrace/run-migrations
-  version: production
-
 # Secret reference names
 secrets:
   admin:
