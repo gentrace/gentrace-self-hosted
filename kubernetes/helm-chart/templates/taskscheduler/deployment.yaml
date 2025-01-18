@@ -28,6 +28,8 @@ spec:
       containers:
       - name: app
         image: "{{ .Values.taskscheduler.image }}:{{ .Values.taskscheduler.version }}"
+        command: ["/entrypoint.sh"]
+        args: ["taskscheduler"]
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: PUBLIC_HOSTNAME
