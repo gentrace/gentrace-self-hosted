@@ -31,3 +31,5 @@ secrets/
 
 all-secrets.yaml
 quay-image-pull-secret.yaml
+
+values-experiment.yaml
