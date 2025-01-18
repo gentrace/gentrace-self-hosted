@@ -1,5 +1,7 @@
 # Gentrace Self-Hosted Deployment Options
 
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/gentrace-self-hosted)](https://artifacthub.io/packages/search?repo=gentrace-self-hosted)
+
 This repository contains multiple deployment options for self-hosting Gentrace. Each option is designed to accommodate different infrastructure requirements and preferences.
 
 ## Available Deployment Methods
