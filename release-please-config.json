@@ -1,0 +1,15 @@
+{
+  "packages": {
+    "kubernetes/helm-chart": {
+      "release-type": "helm",
+      "package-name": "gentrace-self-hosted",
+      "changelog-path": "CHANGELOG.md",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
+      "draft": false,
+      "prerelease": false,
+      "include-component-in-tag": false,
+      "versioning": "default"
+    }
+  }
+}
