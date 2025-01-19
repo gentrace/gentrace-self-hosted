@@ -2,8 +2,19 @@ apiVersion: v1
 entries:
   gentrace-self-hosted:
   - apiVersion: v2
+    appVersion: 0.1.3
+    created: "2025-01-19T02:26:03.912459203Z"
+    description: A Helm chart to deploy Gentrace's infrastructure for self-hosted
+      environments
+    digest: 5abe25f7bc3c24a310b5f613d380cdeddb9e102c621002061e2d3d7e9c152544
+    name: gentrace-self-hosted
+    type: application
+    urls:
+    - gentrace-self-hosted-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
     appVersion: 0.1.0
-    created: "2025-01-19T01:57:34.369586751Z"
+    created: "2025-01-19T02:26:03.911611661Z"
     description: A Helm chart to deploy Gentrace's infrastructure for self-hosted
       environments
     digest: 771d44e3cf6581178410c8db93d4aef69203ec3629a9de24220468c805521729
@@ -14,7 +25,7 @@ entries:
     version: 0.1.0
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2025-01-19T01:57:34.368632199Z"
+    created: "2025-01-19T02:26:03.910725757Z"
     description: A Helm chart to deploy Gentrace's infrastructure for self-hosted
       environments
     digest: 511ae995e09aca9443739f8993bd7525d06b3c61284e246efd4e77a5808a512e
@@ -23,4 +34,4 @@ entries:
     urls:
     - gentrace-self-hosted-0.0.1.tgz
     version: 0.0.1
-generated: "2025-01-19T01:57:34.366620605Z"
+generated: "2025-01-19T02:26:03.90965731Z"
