@@ -1,0 +1,49 @@
+name: Publish Helm Chart
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.HELM_GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.1
+
+      - name: Package Helm Chart
+        run: |
+          mkdir -p .cr-release-packages
+          helm package kubernetes/helm-chart -d .cr-release-packages
+
+      - name: Checkout gh-pages
+        run: |
+          git checkout gh-pages
+          cp .cr-release-packages/* .
+          rm -rf .cr-release-packages
+
+      - name: Generate Helm Repository Index
+        run: |
+          helm repo index .
+
+      - name: Commit and Push Changes
+        run: |
+          git add index.yaml *.tgz
+          git commit -m "chore: update helm repository"
+          git push origin gh-pages
