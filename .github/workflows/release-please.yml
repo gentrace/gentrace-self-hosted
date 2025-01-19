@@ -21,9 +21,10 @@ jobs:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
+          config-file: kubernetes/helm-chart/release-please-config.json
+          manifest-file: kubernetes/helm-chart/.release-please-manifest.json
           release-type: helm
+          path: kubernetes/helm-chart
 
       # Helm publish steps - only run if a release was created
       - name: Checkout for Helm
