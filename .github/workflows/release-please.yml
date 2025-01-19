@@ -18,6 +18,8 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+          release-type: helm
+          package-name: gentrace-self-hosted
 
       # Helm publish steps - only run if a release was created
       - name: Checkout for Helm
