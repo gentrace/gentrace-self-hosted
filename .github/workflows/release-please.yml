@@ -23,7 +23,6 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-          path: kubernetes/helm-chart
           release-type: helm
 
       # Helm publish steps - only run if a release was created
