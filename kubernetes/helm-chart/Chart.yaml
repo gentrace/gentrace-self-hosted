@@ -2,5 +2,5 @@ apiVersion: v2
 name: gentrace-self-hosted
 description: A Helm chart to deploy Gentrace's infrastructure for self-hosted environments
 type: application
-version: 0.1.2
+version: 0.1.3
 appVersion: "0.1.0"
