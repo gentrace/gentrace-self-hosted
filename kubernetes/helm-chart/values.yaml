@@ -15,7 +15,7 @@ app:
   name: app
   host: "self-hosted.your-domain.com"
   port: 3000
-  log_level: info
+  log_level: debug
   replicaCount: 1
 
 api:
