@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "kubernetes/helm-chart/**"
+  workflow_dispatch:
 
 jobs:
   publish:
