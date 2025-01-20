@@ -35,3 +35,7 @@ quay-image-pull-secret.yaml
 values-experiment.yaml
 
 .cr-release-packages/
+
+.env
+
+postgres_data
