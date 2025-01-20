@@ -13,19 +13,20 @@ This repository contains multiple deployment options for self-hosting Gentrace. 
 - Configurable storage classes and database credentials
 - Suitable for production environments
 
-### 2. Docker Compose (Coming Soon)
+### 2. Docker Compose
 
 - Simplified deployment using Docker Compose
 - Great for development and testing
 - Minimal infrastructure requirements
 - Easy setup and teardown
+- See the [Docker Setup Guide](./docker/README.md) to get started
 
 ## Getting Started
 
 Choose the deployment method that best suits your needs:
 
 - For Kubernetes deployment, see the [Helm Chart Documentation](./kubernetes/helm-chart/README.md)
-- For Docker Compose deployment, documentation will be available soon
+- For Docker Compose deployment, see the [Docker Setup Guide](./docker/README.md)
 
 ## Requirements
 
