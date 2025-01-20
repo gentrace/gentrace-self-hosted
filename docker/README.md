@@ -1,97 +1,70 @@
 # Gentrace Self-Hosted Docker Setup
 
-This directory contains Docker Compose configuration for running Gentrace in a self-hosted environment. The setup includes all necessary services for a complete Gentrace deployment.
+⚠️ **Development Only**: This Docker setup is for local development and testing. Not suitable for production use.
+
+This directory contains everything you need to run Gentrace locally using Docker Compose.
+
+## Features
+
+- One-command setup with Docker Compose
+- Pre-configured services (Kafka, PostgreSQL, ClickHouse)
+- Built-in monitoring with Kafka UI
+- Local file storage with MinIO
+- Automatic service discovery and networking
 
 ## Prerequisites
 
-- Docker Engine 20.10.0 or later
-- Docker Compose v2.0.0 or later
-- At least 4GB of RAM available
-- At least 20GB of free disk space
-
-## Services
-
-The following services are included in this setup:
-
-- **API Server**: REST API service (port 3000)
-- **Web App**: Frontend application (port 3001)
-- **WebSocket Server**: Real-time communication server (port 3002)
-- **Task Runner**: Background job processor
-- **Task Scheduler**: Job scheduling service
-- **Databases**:
-  - PostgreSQL (port 5432)
-  - ClickHouse (ports 8123, 9000)
-- **Message Queue**:
-  - Kafka (ports 9092, 29092)
-  - Kafka UI (port 8080)
-  - Kafka Connect (port 8083)
-- **Object Storage**:
-  - MinIO (ports 9000, 9001)
+- Docker Engine 20.10.0+
+- Docker Compose v2.0.0+
+- 4GB RAM minimum
+- 20GB disk space minimum
 
 ## Quick Start
 
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/gentrace/gentrace-self-hosted.git
-   cd gentrace-self-hosted/docker
-   ```
-
-2. Start the services:
+1. Start the services:
 
    ```bash
    docker compose up -d
    ```
 
-3. Monitor the logs:
-
-   ```bash
-   docker compose logs -f
-   ```
-
-4. Access the services:
-   - Web App: http://localhost:3001
-   - API: http://localhost:3000
+2. Access the services:
+   - Web App: http://localhost:3000
    - Kafka UI: http://localhost:8080
-   - MinIO Console: http://localhost:9001
+   - MinIO Console: http://localhost:9001 (credentials: minioadmin/minioadmin)
 
-## Environment Variables
+## Services Overview
 
-Each service can be configured using environment variables. The default values are set in the `docker-compose.yml` file, but you can override them using a `.env` file.
+Core Services:
 
-## Data Persistence
+- Web App & API (port 3000)
+- WebSocket Server (port 3001)
+- Task Runner & Scheduler
 
-All data is persisted using Docker volumes:
+Infrastructure:
 
-- `postgres_data`: PostgreSQL data
-- `kafka_data`: Kafka data
-- `minio_data`: MinIO object storage
-- `clickhouse_data`: ClickHouse data
+- PostgreSQL (port 5432)
+- ClickHouse (port 8123)
+- Kafka (ports 9092, 29092)
+- MinIO (ports 9000, 9001)
 
 ## Troubleshooting
 
-1. If services fail to start, check the logs:
+View logs for a specific service:
 
-   ```bash
-   docker compose logs [service-name]
-   ```
+```bash
+docker compose logs -f [service-name]
+```
 
-2. To reset all data and start fresh:
-   ```bash
-   docker compose down -v
-   docker compose up -d
-   ```
+Reset all data and start fresh:
 
-## Security Notes
+```bash
+docker compose down -v
+docker compose up -d
+```
 
-- Default credentials are set for development purposes only
-- For production deployment:
-  - Change all default passwords
-  - Set up proper authentication
-  - Configure SSL/TLS
-  - Follow security best practices
+## Deployment notes
 
-## Support
-
-For issues and support, please visit:
-https://github.com/gentrace/gentrace-self-hosted/issues
+1. Change all default passwords in `.env`
+2. Set secure values for `JWT_SECRET` and `PRISMA_FIELD_ENCRYPTION_KEY`
+3. Configure proper SSL/TLS
+4. Set appropriate admin credentials
