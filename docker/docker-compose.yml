@@ -1,0 +1,238 @@
+version: "3.8"
+
+services:
+  app:
+    image: quay.io/gentrace/core:production
+    entrypoint: ["/entrypoint.sh"]
+    command: ["app"]
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
+      - KAFKA_BROKER=kafka
+      - KAFKA_PORT=9092
+      - STORAGE_ACCESS_KEY_ID=minioadmin
+      - STORAGE_SECRET_ACCESS_KEY=minioadmin
+      - STORAGE_ENDPOINT=http://minio:9000
+      - STORAGE_BUCKET=gentrace-public
+      - STORAGE_REGION=us-central1
+      - STORAGE_FORCE_PATH_STYLE=true
+      - PUBLIC_HOSTNAME=localhost
+      - PORT=3000
+      - NEXT_PUBLIC_SELF_HOSTED=true
+      - NEXT_PUBLIC_SELF_HOSTED_TLS=false
+      - NEXT_OTEL_VERBOSE=1
+      # Generate with: openssl rand -base64 32
+      - JWT_SECRET=your-very-long-secure-random-jwt-secret-key
+      # Generate a new key at: https://cloak.47ng.com/
+      - PRISMA_FIELD_ENCRYPTION_KEY=your-encryption-key
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+      minio:
+        condition: service_started
+
+  migrate:
+    image: quay.io/gentrace/core:production
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      echo "Running Clickhouse and Postgres migrations + seeding admin..." &&
+      npm run self-hosted:migrate-and-seed
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_PORT=8123
+      - CLICKHOUSE_PROTOCOL=http
+      - CLICKHOUSE_DATABASE=gentrace
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=gentrace123
+      # Change these values for production use
+      - ADMIN_EMAIL=admin@yourdomain.com
+      - ADMIN_PASSWORD=your-secure-admin-password
+      - ADMIN_NAME=Admin User
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+  websocket-server:
+    image: quay.io/gentrace/core:production
+    entrypoint: ["/entrypoint.sh"]
+    command: ["websocket"]
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
+      - KAFKA_BROKER=kafka
+      - KAFKA_PORT=9092
+      - PUBLIC_HOSTNAME=localhost
+      - PORT=3002
+      - NEXT_PUBLIC_SELF_HOSTED=true
+      - NEXT_PUBLIC_SELF_HOSTED_TLS=false
+      - NEXT_OTEL_VERBOSE=1
+      # Generate with: openssl rand -base64 32
+      - JWT_SECRET=your-very-long-secure-random-jwt-secret-key
+      # Generate a new key at: https://cloak.47ng.com/
+      - PRISMA_FIELD_ENCRYPTION_KEY=your-encryption-key
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  taskrunner:
+    image: quay.io/gentrace/core:production
+    entrypoint: ["/entrypoint.sh"]
+    command: ["taskrunner"]
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
+      - KAFKA_BROKER=kafka
+      - KAFKA_PORT=9092
+      - PUBLIC_HOSTNAME=localhost
+      - NEXT_PUBLIC_SELF_HOSTED=true
+      - NEXT_PUBLIC_SELF_HOSTED_TLS=false
+      - NEXT_OTEL_VERBOSE=1
+      # Generate with: openssl rand -base64 32
+      - JWT_SECRET=your-very-long-secure-random-jwt-secret-key
+      # Generate a new key at: https://cloak.47ng.com/
+      - PRISMA_FIELD_ENCRYPTION_KEY=your-encryption-key
+      - STORAGE_ACCESS_KEY_ID=minioadmin
+      - STORAGE_SECRET_ACCESS_KEY=minioadmin
+      - STORAGE_ENDPOINT=http://minio:9000
+      - STORAGE_BUCKET=gentrace-public
+      - STORAGE_REGION=us-central1
+      - STORAGE_FORCE_PATH_STYLE=true
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  taskscheduler:
+    image: quay.io/gentrace/core:production
+    entrypoint: ["/entrypoint.sh"]
+    command: ["taskscheduler"]
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
+      - KAFKA_BROKER=kafka
+      - KAFKA_PORT=9092
+      - PUBLIC_HOSTNAME=localhost
+      - NEXT_PUBLIC_SELF_HOSTED=true
+      - NEXT_PUBLIC_SELF_HOSTED_TLS=false
+      # Generate with: openssl rand -base64 32
+      - JWT_SECRET=your-very-long-secure-random-jwt-secret-key
+      # Generate a new key at: https://cloak.47ng.com/
+      - PRISMA_FIELD_ENCRYPTION_KEY=your-encryption-key
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  postgres:
+    image: postgres:15.3
+    environment:
+      # Change these values for production use
+      - POSTGRES_USER=gentrace
+      - POSTGRES_PASSWORD=gentrace123
+      - POSTGRES_DB=gentrace
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gentrace"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.4
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+    depends_on:
+      - kafka
+
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:7.4.4
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:29092
+      CONNECT_GROUP_ID: kafka-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_REST_PORT: 8083
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+    depends_on:
+      - kafka
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      # Change these values for production use
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8
+    ports:
+      - "8123:8123"
+      - "9100:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8123/ping",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  kafka_data:
+  minio_data:
+  clickhouse_data:
