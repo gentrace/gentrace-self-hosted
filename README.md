@@ -6,7 +6,7 @@ This repository contains multiple deployment options for self-hosting Gentrace. 
 
 ## Available Deployment Methods
 
-### 1. Kubernetes with Helm (Recommended)
+### 1. Kubernetes with Helm
 
 - Full Kubernetes deployment using Helm charts
 - Includes service mesh integration with Istio for mTLS between containers
