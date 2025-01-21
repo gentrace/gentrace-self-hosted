@@ -77,8 +77,6 @@ spec:
           value: "true"
         - name: NEXT_PUBLIC_SELF_HOSTED_TLS
           value: {{ .Values.tls.enabled | quote }}
-        - name: NEXT_OTEL_VERBOSE
-          value: "1"
         envFrom:
           - secretRef:
               name: {{ .Values.secrets.postgres.name }}
