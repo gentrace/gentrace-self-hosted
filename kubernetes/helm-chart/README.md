@@ -226,3 +226,137 @@ secrets:
   prismaFieldEncryption:
     name: prisma-field-encryption-secret
 ```
+
+## Environment Variables
+
+The following tables list all required environment variables for each service:
+
+### App & API Service
+
+| Variable                    | Description                       | Example/Default                                            |
+| --------------------------- | --------------------------------- | ---------------------------------------------------------- |
+| CLICKHOUSE_DATABASE         | ClickHouse database name          | "gentrace"                                                 |
+| CLICKHOUSE_HOST             | ClickHouse hostname               | "clickhouse"                                               |
+| CLICKHOUSE_PASSWORD         | ClickHouse password               | "gentrace123"                                              |
+| CLICKHOUSE_PORT             | ClickHouse port                   | "8123"                                                     |
+| CLICKHOUSE_PROTOCOL         | ClickHouse protocol               | "http"                                                     |
+| CLICKHOUSE_USER             | ClickHouse username               | "default"                                                  |
+| DATABASE_URL                | Full PostgreSQL connection string | "postgresql://gentrace:gentrace123@postgres:5432/gentrace" |
+| ENVIRONMENT                 | Deployment environment identifier | 'production'                                               |
+| JWT_SECRET                  | JWT token secret key              | Generated using: openssl rand -base64 32                   |
+| KAFKA_BROKER                | Kafka broker hostname             | "kafka"                                                    |
+| KAFKA_PORT                  | Kafka broker port                 | "9092"                                                     |
+| NEXT_PUBLIC_SELF_HOSTED     | Self-hosted deployment flag       | "true"                                                     |
+| NEXT_PUBLIC_SELF_HOSTED_TLS | TLS enablement status             | "true"                                                     |
+| NODE_ENV                    | Environment mode                  | 'production', 'development'                                |
+| PORT                        | Service port number               | "3000"                                                     |
+| POSTGRES_DB                 | PostgreSQL database name          | "gentrace"                                                 |
+| POSTGRES_PASSWORD           | PostgreSQL password               | "gentrace123"                                              |
+| POSTGRES_USER               | PostgreSQL username               | "gentrace"                                                 |
+| PRISMA_FIELD_ENCRYPTION_KEY | Prisma field encryption key       | Generated from https://cloak.47ng.com/                     |
+| PUBLIC_HOSTNAME             | Public hostname for the service   | "api.yourdomain.com"                                       |
+| STORAGE_ACCESS_KEY_ID       | Object storage access key         | "your-access-key"                                          |
+| STORAGE_BUCKET              | Object storage bucket name        | "gentrace-public"                                          |
+| STORAGE_ENDPOINT            | Object storage endpoint URL       | "https://storage.googleapis.com"                           |
+| STORAGE_FORCE_PATH_STYLE    | Path style access setting         | "true"                                                     |
+| STORAGE_REGION              | Object storage region             | "us-central1"                                              |
+| STORAGE_SECRET_ACCESS_KEY   | Object storage secret key         | "your-secret-key"                                          |
+
+### WebSocket Server
+
+| Variable                    | Description                           | Example/Default                                            |
+| --------------------------- | ------------------------------------- | ---------------------------------------------------------- |
+| CLICKHOUSE_DATABASE         | ClickHouse database name              | "gentrace"                                                 |
+| CLICKHOUSE_HOST             | ClickHouse hostname                   | "clickhouse"                                               |
+| CLICKHOUSE_PASSWORD         | ClickHouse password                   | "gentrace123"                                              |
+| CLICKHOUSE_PORT             | ClickHouse port                       | "8123"                                                     |
+| CLICKHOUSE_PROTOCOL         | ClickHouse protocol                   | "http"                                                     |
+| CLICKHOUSE_USER             | ClickHouse username                   | "default"                                                  |
+| DATABASE_URL                | Full PostgreSQL connection string     | "postgresql://gentrace:gentrace123@postgres:5432/gentrace" |
+| ENVIRONMENT                 | Deployment environment identifier     | 'production'                                               |
+| JWT_SECRET                  | JWT token secret key                  | Generated using: openssl rand -base64 32                   |
+| KAFKA_BROKER                | Kafka broker hostname                 | "kafka"                                                    |
+| KAFKA_PORT                  | Kafka broker port                     | "9092"                                                     |
+| NEXT_PUBLIC_SELF_HOSTED     | Self-hosted deployment flag           | "true"                                                     |
+| NEXT_PUBLIC_SELF_HOSTED_TLS | TLS enablement status                 | "true"                                                     |
+| NODE_ENV                    | Environment mode                      | 'production', 'development'                                |
+| PORT                        | WebSocket service port number         | "3001"                                                     |
+| POSTGRES_DB                 | PostgreSQL database name              | "gentrace"                                                 |
+| POSTGRES_PASSWORD           | PostgreSQL password                   | "gentrace123"                                              |
+| POSTGRES_USER               | PostgreSQL username                   | "gentrace"                                                 |
+| PRISMA_FIELD_ENCRYPTION_KEY | Prisma field encryption key           | Generated from https://cloak.47ng.com/                     |
+| PUBLIC_HOSTNAME             | Public hostname for WebSocket service | "ws.yourdomain.com"                                        |
+| STORAGE_ACCESS_KEY_ID       | Object storage access key             | "your-access-key"                                          |
+| STORAGE_BUCKET              | Object storage bucket name            | "gentrace-public"                                          |
+| STORAGE_ENDPOINT            | Object storage endpoint URL           | "https://storage.googleapis.com"                           |
+| STORAGE_FORCE_PATH_STYLE    | Path style access setting             | "true"                                                     |
+| STORAGE_REGION              | Object storage region                 | "us-central1"                                              |
+| STORAGE_SECRET_ACCESS_KEY   | Object storage secret key             | "your-secret-key"                                          |
+
+### Task Runner
+
+| Variable                    | Description                       | Example/Default                                            |
+| --------------------------- | --------------------------------- | ---------------------------------------------------------- |
+| CLICKHOUSE_DATABASE         | ClickHouse database name          | "gentrace"                                                 |
+| CLICKHOUSE_HOST             | ClickHouse hostname               | "clickhouse"                                               |
+| CLICKHOUSE_PASSWORD         | ClickHouse password               | "gentrace123"                                              |
+| CLICKHOUSE_PORT             | ClickHouse port                   | "8123"                                                     |
+| CLICKHOUSE_PROTOCOL         | ClickHouse protocol               | "http"                                                     |
+| CLICKHOUSE_USER             | ClickHouse username               | "default"                                                  |
+| DATABASE_URL                | Full PostgreSQL connection string | "postgresql://gentrace:gentrace123@postgres:5432/gentrace" |
+| ENVIRONMENT                 | Deployment environment identifier | 'production'                                               |
+| JWT_SECRET                  | JWT token secret key              | Generated using: openssl rand -base64 32                   |
+| KAFKA_BROKER                | Kafka broker hostname             | "kafka"                                                    |
+| KAFKA_PORT                  | Kafka broker port                 | "9092"                                                     |
+| NEXT_PUBLIC_SELF_HOSTED     | Self-hosted deployment flag       | "true"                                                     |
+| NEXT_PUBLIC_SELF_HOSTED_TLS | TLS enablement status             | "true"                                                     |
+| NODE_ENV                    | Environment mode                  | 'production', 'development'                                |
+| POSTGRES_DB                 | PostgreSQL database name          | "gentrace"                                                 |
+| POSTGRES_PASSWORD           | PostgreSQL password               | "gentrace123"                                              |
+| POSTGRES_USER               | PostgreSQL username               | "gentrace"                                                 |
+| PRISMA_FIELD_ENCRYPTION_KEY | Prisma field encryption key       | Generated from https://cloak.47ng.com/                     |
+| PUBLIC_HOSTNAME             | Public hostname for the service   | "taskrunner.yourdomain.com"                                |
+| STORAGE_ACCESS_KEY_ID       | Object storage access key         | "your-access-key"                                          |
+| STORAGE_BUCKET              | Object storage bucket name        | "gentrace-public"                                          |
+| STORAGE_ENDPOINT            | Object storage endpoint URL       | "https://storage.googleapis.com"                           |
+| STORAGE_FORCE_PATH_STYLE    | Path style access setting         | "true"                                                     |
+| STORAGE_REGION              | Object storage region             | "us-central1"                                              |
+| STORAGE_SECRET_ACCESS_KEY   | Object storage secret key         | "your-secret-key"                                          |
+
+### Task Scheduler
+
+| Variable                    | Description                       | Example/Default                                            |
+| --------------------------- | --------------------------------- | ---------------------------------------------------------- |
+| CLICKHOUSE_DATABASE         | ClickHouse database name          | "gentrace"                                                 |
+| CLICKHOUSE_HOST             | ClickHouse hostname               | "clickhouse"                                               |
+| CLICKHOUSE_PASSWORD         | ClickHouse password               | "gentrace123"                                              |
+| CLICKHOUSE_PORT             | ClickHouse port                   | "8123"                                                     |
+| CLICKHOUSE_PROTOCOL         | ClickHouse protocol               | "http"                                                     |
+| CLICKHOUSE_USER             | ClickHouse username               | "default"                                                  |
+| DATABASE_URL                | Full PostgreSQL connection string | "postgresql://gentrace:gentrace123@postgres:5432/gentrace" |
+| ENVIRONMENT                 | Deployment environment identifier | 'production'                                               |
+| JWT_SECRET                  | JWT token secret key              | Generated using: openssl rand -base64 32                   |
+| KAFKA_BROKER                | Kafka broker hostname             | "kafka"                                                    |
+| KAFKA_PORT                  | Kafka broker port                 | "9092"                                                     |
+| NEXT_PUBLIC_SELF_HOSTED     | Self-hosted deployment flag       | "true"                                                     |
+| NEXT_PUBLIC_SELF_HOSTED_TLS | TLS enablement status             | "true"                                                     |
+| NODE_ENV                    | Environment mode                  | 'production', 'development'                                |
+| POSTGRES_DB                 | PostgreSQL database name          | "gentrace"                                                 |
+| POSTGRES_PASSWORD           | PostgreSQL password               | "gentrace123"                                              |
+| POSTGRES_USER               | PostgreSQL username               | "gentrace"                                                 |
+| PRISMA_FIELD_ENCRYPTION_KEY | Prisma field encryption key       | Generated from https://cloak.47ng.com/                     |
+| PUBLIC_HOSTNAME             | Public hostname for the service   | "scheduler.yourdomain.com"                                 |
+| STORAGE_ACCESS_KEY_ID       | Object storage access key         | "your-access-key"                                          |
+| STORAGE_BUCKET              | Object storage bucket name        | "gentrace-public"                                          |
+| STORAGE_ENDPOINT            | Object storage endpoint URL       | "https://storage.googleapis.com"                           |
+| STORAGE_FORCE_PATH_STYLE    | Path style access setting         | "true"                                                     |
+| STORAGE_REGION              | Object storage region             | "us-central1"                                              |
+| STORAGE_SECRET_ACCESS_KEY   | Object storage secret key         | "your-secret-key"                                          |
+
+### Admin Configuration
+
+| Variable       | Description                 | Example/Default              |
+| -------------- | --------------------------- | ---------------------------- |
+| ADMIN_EMAIL    | Initial admin user email    | "admin@yourdomain.com"       |
+| ADMIN_NAME     | Initial admin user name     | "Admin User"                 |
+| ADMIN_PASSWORD | Initial admin user password | "your-secure-admin-password" |
