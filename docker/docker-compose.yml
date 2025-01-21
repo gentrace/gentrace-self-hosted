@@ -8,26 +8,26 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
-      - CLICKHOUSE_HOST=clickhouse
-      - CLICKHOUSE_PORT=8123
-      - CLICKHOUSE_PROTOCOL=http
-      - CLICKHOUSE_DATABASE=gentrace
-      - CLICKHOUSE_USER=default
-      - CLICKHOUSE_PASSWORD=gentrace123
+      - DATABASE_URL=${DATABASE_URL}
+      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}
+      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT}
+      - CLICKHOUSE_PROTOCOL=${CLICKHOUSE_PROTOCOL}
+      - CLICKHOUSE_DATABASE=${CLICKHOUSE_DATABASE}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
       - KAFKA_BROKER=kafka
       - KAFKA_PORT=9092
-      - STORAGE_ACCESS_KEY_ID=minioadmin
-      - STORAGE_SECRET_ACCESS_KEY=minioadmin
-      - STORAGE_ENDPOINT=http://minio:9000
-      - STORAGE_BUCKET=gentrace-public
-      - STORAGE_REGION=us-central1
-      - STORAGE_FORCE_PATH_STYLE=true
-      - PUBLIC_HOSTNAME=localhost
-      - PORT=3000
-      - NEXT_PUBLIC_SELF_HOSTED=true
-      - NEXT_PUBLIC_SELF_HOSTED_TLS=false
-      - NEXT_OTEL_VERBOSE=1
+      - STORAGE_ACCESS_KEY_ID=${STORAGE_ACCESS_KEY_ID}
+      - STORAGE_SECRET_ACCESS_KEY=${STORAGE_SECRET_ACCESS_KEY}
+      - STORAGE_ENDPOINT=${STORAGE_ENDPOINT}
+      - STORAGE_BUCKET=${STORAGE_BUCKET}
+      - STORAGE_REGION=${STORAGE_REGION}
+      - STORAGE_FORCE_PATH_STYLE=${STORAGE_FORCE_PATH_STYLE}
+      - PUBLIC_HOSTNAME=${PUBLIC_HOSTNAME}
+      - PORT=${PORT}
+      - NEXT_PUBLIC_SELF_HOSTED=${NEXT_PUBLIC_SELF_HOSTED}
+      - NEXT_PUBLIC_SELF_HOSTED_TLS=${NEXT_PUBLIC_SELF_HOSTED_TLS}
+      - NEXT_OTEL_VERBOSE=${NEXT_OTEL_VERBOSE}
       - JWT_SECRET=${JWT_SECRET}
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
     depends_on:
@@ -45,21 +45,21 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command: ["npm run self-hosted:migrate-and-seed"]
     environment:
-      - DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
-      - CLICKHOUSE_HOST=clickhouse
-      - CLICKHOUSE_PORT=8123
-      - CLICKHOUSE_PROTOCOL=http
-      - CLICKHOUSE_DATABASE=gentrace
-      - CLICKHOUSE_USER=default
-      - CLICKHOUSE_PASSWORD=gentrace123
-      - NODE_ENV=development
-      - ENVIRONMENT=development
+      - DATABASE_URL=${DATABASE_URL}
+      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}
+      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT}
+      - CLICKHOUSE_PROTOCOL=${CLICKHOUSE_PROTOCOL}
+      - CLICKHOUSE_DATABASE=${CLICKHOUSE_DATABASE}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
+      - NODE_ENV=${NODE_ENV}
+      - ENVIRONMENT=${ENVIRONMENT}
       - JWT_SECRET=${JWT_SECRET}
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
       # Change these values for production use
-      - ADMIN_EMAIL=admin@yourdomain.com
-      - ADMIN_PASSWORD=your-secure-admin-password
-      - ADMIN_NAME=Admin User
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_NAME=${ADMIN_NAME}
     depends_on:
       postgres:
         condition: service_healthy
@@ -75,20 +75,20 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
-      - CLICKHOUSE_HOST=clickhouse
-      - CLICKHOUSE_PORT=8123
-      - CLICKHOUSE_PROTOCOL=http
-      - CLICKHOUSE_DATABASE=gentrace
-      - CLICKHOUSE_USER=default
-      - CLICKHOUSE_PASSWORD=gentrace123
+      - DATABASE_URL=${DATABASE_URL}
+      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}
+      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT}
+      - CLICKHOUSE_PROTOCOL=${CLICKHOUSE_PROTOCOL}
+      - CLICKHOUSE_DATABASE=${CLICKHOUSE_DATABASE}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
       - KAFKA_BROKER=kafka
       - KAFKA_PORT=9092
-      - PUBLIC_HOSTNAME=localhost
+      - PUBLIC_HOSTNAME=${PUBLIC_HOSTNAME}
       - PORT=3001
-      - NEXT_PUBLIC_SELF_HOSTED=true
-      - NEXT_PUBLIC_SELF_HOSTED_TLS=false
-      - NEXT_OTEL_VERBOSE=1
+      - NEXT_PUBLIC_SELF_HOSTED=${NEXT_PUBLIC_SELF_HOSTED}
+      - NEXT_PUBLIC_SELF_HOSTED_TLS=${NEXT_PUBLIC_SELF_HOSTED_TLS}
+      - NEXT_OTEL_VERBOSE=${NEXT_OTEL_VERBOSE}
       - JWT_SECRET=${JWT_SECRET}
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
     depends_on:
@@ -102,27 +102,27 @@ services:
     entrypoint: ["/entrypoint.sh"]
     command: ["taskrunner"]
     environment:
-      - DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
-      - CLICKHOUSE_HOST=clickhouse
-      - CLICKHOUSE_PORT=8123
-      - CLICKHOUSE_PROTOCOL=http
-      - CLICKHOUSE_DATABASE=gentrace
-      - CLICKHOUSE_USER=default
-      - CLICKHOUSE_PASSWORD=gentrace123
+      - DATABASE_URL=${DATABASE_URL}
+      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}
+      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT}
+      - CLICKHOUSE_PROTOCOL=${CLICKHOUSE_PROTOCOL}
+      - CLICKHOUSE_DATABASE=${CLICKHOUSE_DATABASE}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
       - KAFKA_BROKER=kafka
       - KAFKA_PORT=9092
-      - PUBLIC_HOSTNAME=localhost
-      - NEXT_PUBLIC_SELF_HOSTED=true
-      - NEXT_PUBLIC_SELF_HOSTED_TLS=false
-      - NEXT_OTEL_VERBOSE=1
+      - PUBLIC_HOSTNAME=${PUBLIC_HOSTNAME}
+      - NEXT_PUBLIC_SELF_HOSTED=${NEXT_PUBLIC_SELF_HOSTED}
+      - NEXT_PUBLIC_SELF_HOSTED_TLS=${NEXT_PUBLIC_SELF_HOSTED_TLS}
+      - NEXT_OTEL_VERBOSE=${NEXT_OTEL_VERBOSE}
       - JWT_SECRET=${JWT_SECRET}
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
-      - STORAGE_ACCESS_KEY_ID=minioadmin
-      - STORAGE_SECRET_ACCESS_KEY=minioadmin
-      - STORAGE_ENDPOINT=http://minio:9000
-      - STORAGE_BUCKET=gentrace-public
-      - STORAGE_REGION=us-central1
-      - STORAGE_FORCE_PATH_STYLE=true
+      - STORAGE_ACCESS_KEY_ID=${STORAGE_ACCESS_KEY_ID}
+      - STORAGE_SECRET_ACCESS_KEY=${STORAGE_SECRET_ACCESS_KEY}
+      - STORAGE_ENDPOINT=${STORAGE_ENDPOINT}
+      - STORAGE_BUCKET=${STORAGE_BUCKET}
+      - STORAGE_REGION=${STORAGE_REGION}
+      - STORAGE_FORCE_PATH_STYLE=${STORAGE_FORCE_PATH_STYLE}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -134,18 +134,18 @@ services:
     entrypoint: ["/entrypoint.sh"]
     command: ["taskscheduler"]
     environment:
-      - DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
-      - CLICKHOUSE_HOST=clickhouse
-      - CLICKHOUSE_PORT=8123
-      - CLICKHOUSE_PROTOCOL=http
-      - CLICKHOUSE_DATABASE=gentrace
-      - CLICKHOUSE_USER=default
-      - CLICKHOUSE_PASSWORD=gentrace123
+      - DATABASE_URL=${DATABASE_URL}
+      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}
+      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT}
+      - CLICKHOUSE_PROTOCOL=${CLICKHOUSE_PROTOCOL}
+      - CLICKHOUSE_DATABASE=${CLICKHOUSE_DATABASE}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
       - KAFKA_BROKER=kafka
       - KAFKA_PORT=9092
-      - PUBLIC_HOSTNAME=localhost
-      - NEXT_PUBLIC_SELF_HOSTED=true
-      - NEXT_PUBLIC_SELF_HOSTED_TLS=false
+      - PUBLIC_HOSTNAME=${PUBLIC_HOSTNAME}
+      - NEXT_PUBLIC_SELF_HOSTED=${NEXT_PUBLIC_SELF_HOSTED}
+      - NEXT_PUBLIC_SELF_HOSTED_TLS=${NEXT_PUBLIC_SELF_HOSTED_TLS}
       - JWT_SECRET=${JWT_SECRET}
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
     depends_on:
@@ -158,9 +158,9 @@ services:
     image: postgres:15.3
     environment:
       # Change these values for production use
-      - POSTGRES_USER=gentrace
-      - POSTGRES_PASSWORD=gentrace123
-      - POSTGRES_DB=gentrace
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -203,10 +203,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
-      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME=clickhouse
-      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS=http://kafka-connect:8083
+      - KAFKA_CLUSTERS_0_NAME=${KAFKA_CLUSTERS_0_NAME}
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=${KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS}
+      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME=${KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME}
+      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS=${KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS}
     depends_on:
       - kafka
 
@@ -215,15 +215,15 @@ services:
     ports:
       - "8083:8083"
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
-      CONNECT_GROUP_ID: kafka-connect-group
-      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
-      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
-      CONNECT_STATUS_STORAGE_TOPIC: connect-status
-      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_REST_PORT: 8083
-      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_BOOTSTRAP_SERVERS: ${CONNECT_BOOTSTRAP_SERVERS}
+      CONNECT_GROUP_ID: ${CONNECT_GROUP_ID}
+      CONNECT_CONFIG_STORAGE_TOPIC: ${CONNECT_CONFIG_STORAGE_TOPIC}
+      CONNECT_OFFSET_STORAGE_TOPIC: ${CONNECT_OFFSET_STORAGE_TOPIC}
+      CONNECT_STATUS_STORAGE_TOPIC: ${CONNECT_STATUS_STORAGE_TOPIC}
+      CONNECT_KEY_CONVERTER: ${CONNECT_KEY_CONVERTER}
+      CONNECT_VALUE_CONVERTER: ${CONNECT_VALUE_CONVERTER}
+      CONNECT_REST_PORT: ${CONNECT_REST_PORT}
+      CONNECT_REST_ADVERTISED_HOST_NAME: ${CONNECT_REST_ADVERTISED_HOST_NAME}
     depends_on:
       - kafka
 
@@ -234,8 +234,8 @@ services:
       - "9001:9001"
     environment:
       # Change these values for production use
-      - MINIO_ROOT_USER=minioadmin
-      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
@@ -246,8 +246,8 @@ services:
       - "8123:8123" # http port
       - "9100:9000" # native port
     environment:
-      - CLICKHOUSE_USER=default
-      - CLICKHOUSE_PASSWORD=gentrace123
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     ulimits:
