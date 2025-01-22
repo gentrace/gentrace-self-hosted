@@ -185,16 +185,11 @@ The following tables list all required environment variables for each service:
 
 To set up your environment variables:
 
-1. For Unix-based systems (Linux/Mac):
+For Unix-based systems (Linux/Mac):
 
-   ```bash
-   ./environment/setup-env.sh
-   ```
-
-2. For Windows:
-   ```cmd
-   environment\setup-env.bat
-   ```
+```bash
+./environment/setup-env.sh
+```
 
 These scripts will help you generate secure values and create a `.env` file with all necessary configurations.
 
