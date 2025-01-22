@@ -36,6 +36,8 @@ values-experiment.yaml
 
 .cr-release-packages/
 
+env-files
 .env
 
 postgres_data
+

@@ -66,7 +66,6 @@ The following tables list all required environment variables for each service:
 | JWT_SECRET                  | JWT token secret key              | Generated using: openssl rand -base64 32                 |
 | KAFKA_BROKER                | Kafka broker hostname             | kafka                                                    |
 | KAFKA_PORT                  | Kafka broker port                 | 9092                                                     |
-| NEXT_OTEL_VERBOSE           | OpenTelemetry verbosity level     | 1                                                        |
 | NEXT_PUBLIC_SELF_HOSTED     | Self-hosted deployment flag       | true                                                     |
 | NEXT_PUBLIC_SELF_HOSTED_TLS | TLS enablement status             | true                                                     |
 | NODE_ENV                    | Environment mode                  | production, development                                  |
