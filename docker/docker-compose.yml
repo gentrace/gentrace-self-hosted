@@ -45,6 +45,9 @@ services:
     command: ["npm run self-hosted:migrate-and-seed"]
     environment:
       - DATABASE_URL=${DATABASE_URL}
+      - NODE_TLS_REJECT_UNAUTHORIZED="0"
+      - PRISMA_BINARIES_MIRROR=http://prisma-builds.s3-eu-west-1.amazonaws.com
+      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING="1"
       - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}
       - CLICKHOUSE_PORT=${CLICKHOUSE_PORT}
       - CLICKHOUSE_PROTOCOL=${CLICKHOUSE_PROTOCOL}
