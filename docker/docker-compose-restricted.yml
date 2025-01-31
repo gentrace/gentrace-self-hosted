@@ -60,6 +60,11 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - NET_BIND_SERVICE
+      - SYSLOG
 
   migrate:
     image: quay.io/gentrace/core:production
