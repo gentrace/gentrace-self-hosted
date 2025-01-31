@@ -4,6 +4,15 @@ networks:
     ipam:
       config:
         - subnet: 192.168.240.0/24
+  prisma_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  kafka_data:
+  minio_data:
+  clickhouse_data:
+  prisma_binaries:
 
 services:
   app:
@@ -60,11 +69,16 @@ services:
     command: ["npm run self-hosted:migrate-and-seed"]
     networks:
       - internal_net
-    read_only: true
+      - prisma_net
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       - OTEL_SDK_DISABLED=true
       - DATABASE_URL=${DATABASE_URL}
@@ -360,9 +374,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-
-volumes:
-  postgres_data:
-  kafka_data:
-  minio_data:
-  clickhouse_data:
