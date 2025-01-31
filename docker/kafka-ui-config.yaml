@@ -1,0 +1,14 @@
+auth:
+  type: DISABLED
+kafka:
+  clusters:
+    - bootstrapServers: kafka:9092
+      kafkaConnect:
+        - address: http://kafka-connect:8083
+          name: clickhouse
+      name: dev
+      properties: {}
+      readOnly: false
+rbac:
+  roles: []
+webclient: {}

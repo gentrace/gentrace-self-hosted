@@ -38,6 +38,9 @@ values-experiment.yaml
 
 env-files
 .env
+.env*
 
 postgres_data
+
+*.tar
 
