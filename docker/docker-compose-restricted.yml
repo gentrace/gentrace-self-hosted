@@ -13,6 +13,7 @@ volumes:
   minio_data:
   clickhouse_data:
   prisma_binaries:
+  kafka_connect_plugins:
 
 services:
   app:
@@ -284,12 +285,34 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - KAFKA_CLUSTERS_0_NAME=${KAFKA_CLUSTERS_0_NAME}
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=${KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS}
-      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME=${KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME}
-      - KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS=${KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS}
+      - DYNAMIC_CONFIG_ENABLED=true
+    volumes:
+      - ./kafka-ui-config.yaml:/etc/kafkaui/dynamic_config.yaml
     depends_on:
       - kafka
+
+  init-kafka-connect:
+    image: curlimages/curl:latest
+    networks:
+      - internal_net
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: root
+    command: >
+      sh -c "
+        mkdir -p /plugins &&
+        chmod 777 /plugins &&
+        curl -L https://github.com/ClickHouse/clickhouse-kafka-connect/releases/download/v1.0.17/clickhouse-kafka-connect-v1.0.17.zip -o /plugins/clickhouse-connector.zip &&
+        cd /plugins && 
+        unzip clickhouse-connector.zip &&
+        mv clickhouse-kafka-connect-v1.0.17/* . &&
+        rm -rf clickhouse-connector.zip clickhouse-kafka-connect-v1.0.17 &&
+        chown -R 1000:1000 /plugins/*
+      "
+    volumes:
+      - kafka_connect_plugins:/plugins
 
   kafka-connect:
     image: confluentinc/cp-kafka-connect:7.4.4
@@ -303,18 +326,25 @@ services:
       - NET_BIND_SERVICE
     ports:
       - "8083:8083"
+    entrypoint: >
+      sh -c "
+        echo 'Sleeping for 10 seconds as a hack to ensure other services are ready...' &&
+        sleep 10 &&
+        /bin/connect-standalone /etc/kafka-connect/config/standalone.properties /etc/kafka-connect/config/clickhouse.properties
+      "
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: ${CONNECT_BOOTSTRAP_SERVERS}
-      CONNECT_GROUP_ID: ${CONNECT_GROUP_ID}
-      CONNECT_CONFIG_STORAGE_TOPIC: ${CONNECT_CONFIG_STORAGE_TOPIC}
-      CONNECT_OFFSET_STORAGE_TOPIC: ${CONNECT_OFFSET_STORAGE_TOPIC}
-      CONNECT_STATUS_STORAGE_TOPIC: ${CONNECT_STATUS_STORAGE_TOPIC}
-      CONNECT_KEY_CONVERTER: ${CONNECT_KEY_CONVERTER}
-      CONNECT_VALUE_CONVERTER: ${CONNECT_VALUE_CONVERTER}
-      CONNECT_REST_PORT: ${CONNECT_REST_PORT}
-      CONNECT_REST_ADVERTISED_HOST_NAME: ${CONNECT_REST_ADVERTISED_HOST_NAME}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
+    volumes:
+      - ./kafka-connect-config:/etc/kafka-connect/config
+      - kafka_connect_plugins:/usr/share/java/kafka-connect-plugins
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      init-kafka-connect:
+        condition: service_completed_successfully
 
   minio:
     image: minio/minio:latest
