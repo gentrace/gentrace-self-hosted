@@ -216,12 +216,12 @@ services:
     image: confluentinc/cp-kafka-connect:7.4.4
     ports:
       - "8083:8083"
-    command:
-      [
-        "/bin/connect-standalone",
-        "/etc/kafka-connect/config/standalone.properties",
-        "/etc/kafka-connect/config/clickhouse.properties",
-      ]
+    entrypoint: >
+      sh -c "
+        echo 'Sleeping for 10 seconds as a hack to ensure other services are ready...' &&
+        sleep 10 &&
+        /bin/connect-standalone /etc/kafka-connect/config/standalone.properties /etc/kafka-connect/config/clickhouse.properties
+      "
     environment:
       - CLICKHOUSE_USER=${CLICKHOUSE_USER}
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
