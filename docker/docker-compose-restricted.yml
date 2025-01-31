@@ -4,7 +4,7 @@ networks:
     ipam:
       config:
         - subnet: 192.168.240.0/24
-  prisma_net:
+  external_net:
     driver: bridge
 
 volumes:
@@ -23,13 +23,11 @@ services:
       - "3000:3000"
     networks:
       - internal_net
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    cap_add:
-      - NET_BIND_SERVICE
+      - external_net
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    user: root
     environment:
       - OTEL_SDK_DISABLED=true
       - DATABASE_URL=${DATABASE_URL}
@@ -69,7 +67,7 @@ services:
     command: ["npm run self-hosted:migrate-and-seed"]
     networks:
       - internal_net
-      - prisma_net
+      - external_net
     security_opt:
       - no-new-privileges:true
     cap_drop:
