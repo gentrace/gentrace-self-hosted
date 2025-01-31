@@ -41,3 +41,5 @@ env-files
 
 postgres_data
 
+*.tar
+
