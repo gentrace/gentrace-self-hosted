@@ -255,6 +255,7 @@ services:
     environment:
       - CLICKHOUSE_USER=${CLICKHOUSE_USER}
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
+      - CLICKHOUSE_DATABASE=${CLICKHOUSE_DATABASE}
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     ulimits:
