@@ -21,6 +21,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Login to Quay.io
         uses: docker/login-action@v3
         with:
@@ -46,6 +49,7 @@ jobs:
           context: docker
           file: docker/Dockerfile.kafka-connect
           builder: ${{ steps.buildx.outputs.name }}
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             quay.io/gentrace/kafka-connect-clickhouse:latest
