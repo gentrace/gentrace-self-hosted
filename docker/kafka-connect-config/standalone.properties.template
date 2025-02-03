@@ -1,7 +1,7 @@
-bootstrap.servers=kafka:9092
+bootstrap.servers=${CONNECT_BOOTSTRAP_SERVERS}
 
-key.converter=org.apache.kafka.connect.json.JsonConverter
-value.converter=org.apache.kafka.connect.json.JsonConverter
+key.converter=${CONNECT_KEY_CONVERTER}
+value.converter=${CONNECT_VALUE_CONVERTER}
 key.converter.schemas.enable=true
 value.converter.schemas.enable=true
 
