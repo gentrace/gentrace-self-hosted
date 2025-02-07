@@ -1,6 +1,7 @@
 services:
   app:
-    image: quay.io/gentrace/core:production
+    platform: linux/amd64
+    image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/entrypoint.sh"]
     command: ["app"]
     ports:
@@ -40,7 +41,8 @@ services:
         condition: service_started
 
   migrate:
-    image: quay.io/gentrace/core:production
+    platform: linux/amd64
+    image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/bin/sh", "-c"]
     command: ["npm run self-hosted:migrate-and-seed"]
     environment:
@@ -72,7 +74,8 @@ services:
   # Note: Routing to websocket-server is not yet configured from the app container. This
   # service will not be accessible externally.
   websocket-server:
-    image: quay.io/gentrace/core:production
+    platform: linux/amd64
+    image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/entrypoint.sh"]
     command: ["websocket"]
     ports:
@@ -101,7 +104,8 @@ services:
         condition: service_healthy
 
   taskrunner:
-    image: quay.io/gentrace/core:production
+    platform: linux/amd64
+    image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/entrypoint.sh"]
     command: ["taskrunner"]
     environment:
@@ -133,7 +137,8 @@ services:
         condition: service_healthy
 
   taskscheduler:
-    image: quay.io/gentrace/core:production
+    platform: linux/amd64
+    image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/entrypoint.sh"]
     command: ["taskscheduler"]
     environment:
@@ -214,6 +219,7 @@ services:
       - kafka
 
   kafka-connect:
+    platform: linux/amd64
     image: quay.io/gentrace/kafka-connect-clickhouse
     ports:
       - "8083:8083"
