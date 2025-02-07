@@ -28,6 +28,7 @@ services:
       - NEXT_PUBLIC_SELF_HOSTED_TLS=${NEXT_PUBLIC_SELF_HOSTED_TLS}
       - JWT_SECRET=${JWT_SECRET}
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
+      - WEBSOCKET_URL=${WEBSOCKET_URL}
     depends_on:
       migrate:
         condition: service_completed_successfully
