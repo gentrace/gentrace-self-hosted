@@ -1,3 +1,13 @@
+# ⚠️ RESTRICTED ENVIRONMENT NOTICE ⚠️
+# This compose file is specifically designed for running Gentrace in firewalled/restricted environments.
+# It includes:
+# - Internal network isolation
+# - Restricted network access
+# - Dropped capabilities
+# - Security hardening
+# For standard deployments, please use the regular docker-compose.yml instead.
+# Only use this file if you have specific firewall/network restrictions or security requirements.
+
 networks:
   internal_net:
     internal: true
