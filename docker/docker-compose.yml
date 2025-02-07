@@ -75,6 +75,7 @@ services:
     image: quay.io/gentrace/core:production
     entrypoint: ["/entrypoint.sh"]
     command: ["websocket"]
+    restart: unless-stopped
     ports:
       - "3001:3001"
     environment:
