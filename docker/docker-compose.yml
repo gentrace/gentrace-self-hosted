@@ -2,8 +2,8 @@ services:
   app:
     platform: linux/amd64
     image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
-    entrypoint: ["/entrypoint.sh"]
-    command: ["app"]
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["npm run self-hosted:migrate-and-seed && /entrypoint.sh app"]
     ports:
       - "3000:3000"
     environment:
@@ -30,46 +30,21 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
       - WEBSOCKET_URL=${WEBSOCKET_URL}
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
-      postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      minio:
-        condition: service_started
-
-  migrate:
-    platform: linux/amd64
-    image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
-    entrypoint: ["/bin/sh", "-c"]
-    command: ["npm run self-hosted:migrate-and-seed"]
-    environment:
-      - OTEL_SDK_DISABLED=true
-      - DATABASE_URL=${DATABASE_URL}
       - NODE_TLS_REJECT_UNAUTHORIZED="0"
       - PRISMA_BINARIES_MIRROR=http://prisma-builds.s3-eu-west-1.amazonaws.com
       - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING="1"
-      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}
-      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT}
-      - CLICKHOUSE_PROTOCOL=${CLICKHOUSE_PROTOCOL}
-      - CLICKHOUSE_DATABASE=${CLICKHOUSE_DATABASE}
-      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
-      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
       - NODE_ENV=${NODE_ENV}
       - ENVIRONMENT=${ENVIRONMENT}
-      - JWT_SECRET=${JWT_SECRET}
-      - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
-      # Change these values for production use
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ADMIN_NAME=${ADMIN_NAME}
     depends_on:
       postgres:
         condition: service_healthy
-      clickhouse:
+      kafka:
         condition: service_healthy
+      minio:
+        condition: service_started
 
   # Note: Routing to websocket-server is not yet configured from the app container. This
   # service will not be accessible externally.
@@ -99,8 +74,6 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
     depends_on:
-      migrate:
-        condition: service_completed_successfully
       kafka:
         condition: service_healthy
 
@@ -132,8 +105,6 @@ services:
       - STORAGE_REGION=${STORAGE_REGION}
       - STORAGE_FORCE_PATH_STYLE=${STORAGE_FORCE_PATH_STYLE}
     depends_on:
-      migrate:
-        condition: service_completed_successfully
       kafka:
         condition: service_healthy
 
@@ -159,8 +130,6 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
     depends_on:
-      migrate:
-        condition: service_completed_successfully
       kafka:
         condition: service_healthy
 
