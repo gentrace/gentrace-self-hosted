@@ -1,7 +1,7 @@
 services:
   app:
     platform: linux/amd64
-    image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
+    image: ${IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/bin/sh", "-c"]
     command: ["npm run self-hosted:migrate-and-seed && /entrypoint.sh app"]
     ports:
@@ -50,7 +50,7 @@ services:
   # service will not be accessible externally.
   websocket-server:
     platform: linux/amd64
-    image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
+    image: ${IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/entrypoint.sh"]
     command: ["websocket"]
     restart: unless-stopped
@@ -79,7 +79,7 @@ services:
 
   taskrunner:
     platform: linux/amd64
-    image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
+    image: ${IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/entrypoint.sh"]
     command: ["taskrunner"]
     environment:
@@ -110,7 +110,7 @@ services:
 
   taskscheduler:
     platform: linux/amd64
-    image: quay.io/gentrace/core:${GENTRACE_CORE_VERSION:-production}
+    image: ${IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/entrypoint.sh"]
     command: ["taskscheduler"]
     environment:
@@ -190,7 +190,7 @@ services:
 
   kafka-connect:
     platform: linux/amd64
-    image: quay.io/gentrace/kafka-connect-clickhouse
+    image: ${IMAGE_URL_PREFIX:-quay.io}/gentrace/kafka-connect-clickhouse
     ports:
       - "8083:8083"
     environment:
