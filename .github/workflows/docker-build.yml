@@ -43,17 +43,30 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-kafka-connect-
 
-      - name: Build and push Kafka Connect image
+      - name: Build and push Kafka Connect image (AMD64)
         uses: docker/build-push-action@v4
         with:
           context: docker
           file: docker/Dockerfile.kafka-connect
           builder: ${{ steps.buildx.outputs.name }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: |
             quay.io/gentrace/kafka-connect-clickhouse:latest
-            quay.io/gentrace/kafka-connect-clickhouse:${{ github.sha }}
+            quay.io/gentrace/kafka-connect-clickhouse:v1.0.0-amd64
+          cache-from: type=local,src=/tmp/.buildx-cache-kafka-connect
+          cache-to: type=local,dest=/tmp/.buildx-cache-kafka-connect-new
+
+      - name: Build and push Kafka Connect image (ARM64)
+        uses: docker/build-push-action@v4
+        with:
+          context: docker
+          file: docker/Dockerfile.kafka-connect
+          builder: ${{ steps.buildx.outputs.name }}
+          platforms: linux/arm64
+          push: true
+          tags: |
+            quay.io/gentrace/kafka-connect-clickhouse:v1.0.0-arm64
           cache-from: type=local,src=/tmp/.buildx-cache-kafka-connect
           cache-to: type=local,dest=/tmp/.buildx-cache-kafka-connect-new
 
