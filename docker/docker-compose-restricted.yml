@@ -353,7 +353,7 @@ services:
       - minio_data:/data
 
   clickhouse:
-    image: clickhouse/clickhouse-server:23.8
+    image: clickhouse/clickhouse-server:24.8
     networks:
       - internal_net
     security_opt:
