@@ -83,7 +83,7 @@ postgres:
 clickhouse:
   enabled: true
   image: clickhouse/clickhouse-server
-  version: "23.8"
+  version: "24.8"
   storage:
     size: 10Gi
     storageClass: "" # Use cluster default if not specified
