@@ -10,22 +10,24 @@ This Helm chart deploys a complete Gentrace self-hosted environment on Kubernete
 - Kafka Message Queue
 - Object Storage Integration (optional MinIO deployment)
 - Service Mesh (Istio) Configuration
-
 ## Quick Installation
 
-1. Generate required secrets:
+1. Before installing, configure secrets for the various components. An example secrets file is provided at `kubernetes/example-secrets/all-secrets.yaml.example`. Copy this file to `all-secrets.yaml` and modify the values for your environment.
 
-   - Generate a JWT secret using: `openssl rand -base64 32`
-   - Generate a Prisma field encryption key at: https://cloak.47ng.com/
-   - Update these values in the example secrets file
+2. The JWT and encryption key secrets require special generation:
 
-2. Create required secrets by copying and modifying the example secrets file in `kubernetes/example-secrets/all-secrets.yaml.example`, then apply with:
+   - Generate a JWT secret from your CLI with `openssl rand -base64 32` and add it to the `jwt-secret` section of your secrets YAML under `JWT_SECRET`
+   - Generate a Prisma field encryption key at: https://cloak.47ng.com/ and add it to the `prisma-field-encryption-secret` section under `PRISMA_FIELD_ENCRYPTION_KEY`
+
+3. Apply your secrets into your cluster with this command:
 
 ```bash
-kubectl apply -f ../example-secrets/all-secrets.yaml.example
+kubectl apply -f <root>/kubernetes/example-secrets/all-secrets.yaml -n your-namespace
 ```
 
-3. Invoke Helm install command:
+4. If you need to modify other configuration about the system (e.g. CPU, memory allocations), modify `kubernetes/helm-chart/values.yaml` to specify these values.
+
+5. Once you have created your secrets and modified your `values.yaml`, you can deploy your Kubernetes cluster with this command:
 
 ```bash
 cd <root>/kubernetes/
@@ -35,13 +37,32 @@ helm install gentrace ./helm-chart \
   --timeout 10m
 ```
 
-4. Verify installation:
+6. Verify installation:
 
 ```bash
 kubectl get pods -n your-namespace
 ```
 
 For detailed configuration options and advanced setup, continue reading below.
+
+### Uninstalling
+
+To remove the Gentrace deployment and all its resources from your cluster:
+
+```bash
+helm uninstall gentrace -n your-namespace
+```
+
+### Upgrading
+
+To upgrade the Gentrace deployment, first update your values.yaml file with any desired changes, then run:
+
+```bash
+helm upgrade gentrace ./helm-chart \
+  --namespace your-namespace \
+  --values values.yaml \
+  --timeout 10m
+```
 
 ## Prerequisites
 
