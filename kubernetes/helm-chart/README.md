@@ -11,6 +11,38 @@ This Helm chart deploys a complete Gentrace self-hosted environment on Kubernete
 - Object Storage Integration (optional MinIO deployment)
 - Service Mesh (Istio) Configuration
 
+## Quick Installation
+
+1. Generate required secrets:
+
+   - Generate a JWT secret using: `openssl rand -base64 32`
+   - Generate a Prisma field encryption key at: https://cloak.47ng.com/
+   - Update these values in the example secrets file
+
+2. Create required secrets by copying and modifying the example secrets file in `kubernetes/example-secrets/all-secrets.yaml.example`, then apply with:
+
+```bash
+kubectl apply -f ../example-secrets/all-secrets.yaml.example
+```
+
+3. Invoke Helm install command:
+
+```bash
+cd <root>/kubernetes/
+helm install gentrace ./helm-chart \
+  --namespace your-namespace \
+  --values values.yaml \
+  --timeout 10m
+```
+
+4. Verify installation:
+
+```bash
+kubectl get pods -n your-namespace
+```
+
+For detailed configuration options and advanced setup, continue reading below.
+
 ## Prerequisites
 
 Before installing this chart, you'll need:
@@ -21,30 +53,102 @@ Before installing this chart, you'll need:
 - A configured storage class (see Storage Class Configuration section below)
 - Access to pull container images
 - Configured secrets (see example in `kubernetes/example-secrets/`)
+- An Ingress Controller installed and configured for your cloud provider
 
-## Quick Start
+## Cloud Provider Support
 
-1. Create a `values.yaml` file with your configuration:
+This Helm chart is designed to work with any Kubernetes cluster, including:
 
-# Storage Class Configuration
+- Azure Kubernetes Service (AKS)
+- Amazon Elastic Kubernetes Service (EKS)
+- Google Kubernetes Engine (GKE)
+- Self-hosted Kubernetes clusters
+- Other managed Kubernetes services
 
-You must specify a storage class policy for your Kubernetes cluster before deploying this Helm chart. The storage class should have an appropriate reclaim policy based on your data retention needs.
+### Cloud-Specific Configuration Examples
 
-Here's an example storage class configuration with a "Retain" policy that preserves volumes after PVC deletion:
+#### Azure Kubernetes Service (AKS)
 
+1. Storage Class Example:
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: gentrace-storage
-provisioner: kubernetes.io/gce-pd # Change based on your cloud provider
+provisioner: kubernetes.io/azure-disk
 parameters:
-  type: gp3 # Storage type, change as needed
-  fsType: ext4
+  storageaccounttype: Premium_LRS
+  kind: Managed
 reclaimPolicy: Retain
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
 ```
+
+2. Ingress Configuration (values.yaml):
+```yaml
+ingress:
+  className: azure-application-gateway
+  annotations:
+    kubernetes.io/ingress.class: azure-application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+```
+
+#### Amazon Elastic Kubernetes Service (EKS)
+
+1. Storage Class Example:
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gentrace-storage
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+```
+
+2. Ingress Configuration (values.yaml):
+```yaml
+ingress:
+  className: alb
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+```
+
+#### Google Kubernetes Engine (GKE)
+
+1. Storage Class Example:
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gentrace-storage
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+```
+
+2. Ingress Configuration (values.yaml):
+```yaml
+ingress:
+  className: gce
+  annotations:
+    kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.global-static-ip-name: "your-static-ip-name"
+```
+
+# Storage Class Configuration
+
+You must specify a storage class policy for your Kubernetes cluster before deploying this Helm chart. The storage class should have an appropriate reclaim policy based on your data retention needs.
+
+See the Cloud-Specific Configuration Examples section above for storage class examples for different cloud providers.
 
 # Istio Configuration
 
@@ -161,11 +265,11 @@ metadata:
   name: object-storage-credentials
 type: Opaque
 stringData:
-  STORAGE_ACCESS_KEY_ID: "your-access-key"
-  STORAGE_SECRET_ACCESS_KEY: "your-secret-key"
-  STORAGE_ENDPOINT: "https://storage.googleapis.com"
-  STORAGE_BUCKET: "gentrace-public"
-  STORAGE_REGION: "us-central1" # Required even for MinIO
+  STORAGE_ACCESS_KEY_ID: "your-access-key" # If using Minio, this is the Minio user
+  STORAGE_SECRET_ACCESS_KEY: "your-secret-key" # If using Minio, this is the Minio user password
+  STORAGE_ENDPOINT: "https://your-storage-endpoint"
+  STORAGE_BUCKET: "your-bucket-name"
+  STORAGE_REGION: "your-region" # Required even for Minio
   STORAGE_FORCE_PATH_STYLE: "true"
 ```
 
