@@ -4,13 +4,13 @@ metadata:
     name: gentrace-ingress-{{ .Values.environment }}
     annotations:
         ingress.kubernetes.io/enable-cors: "true"
-        {{- if and .Values.gke.enabled .Values.gke.staticIpName }}
-        "kubernetes.io/ingress.global-static-ip-name": {{ quote .Values.gke.staticIpName }}
-        {{- end }}
-        {{- if and .Values.gke.enabled .Values.gke.internalLb }}
-        "kubernetes.io/ingress.class": "gce-internal"
+        {{- if .Values.ingress.annotations }}
+        {{- toYaml .Values.ingress.annotations | nindent 8 }}
         {{- end }}
 spec:
+    {{- if .Values.ingress.className }}
+    ingressClassName: {{ .Values.ingress.className }}
+    {{- end }}
     {{- if and .Values.tls.enabled .Values.tls.certificates }}
     tls:
     {{- range .Values.tls.certificates }}

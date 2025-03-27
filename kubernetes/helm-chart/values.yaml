@@ -1,4 +1,4 @@
-# IMPORTANT: Please read the README.txt file for storage class configuration requirements
+# IMPORTANT: Please read the README.md file for storage class configuration requirements
 # before deploying this Helm chart. Proper storage class setup is required for database persistence.
 
 environment: prod
@@ -10,6 +10,24 @@ image:
   version: production
   pullPolicy: Always
   pullSecretName: "gentrace-gentracebot-pull-secret"
+
+# Ingress configuration
+ingress:
+  # -- Ingress class name (e.g., nginx, azure-application-gateway, etc.)
+  className: ""
+  # -- Additional annotations for the ingress resource
+  annotations: {}
+  # Example annotations for different cloud providers:
+  # Azure Application Gateway:
+  #   kubernetes.io/ingress.class: azure-application-gateway
+  #   appgw.ingress.kubernetes.io/ssl-redirect: "true"
+  # Nginx:
+  #   kubernetes.io/ingress.class: nginx
+  #   nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  # AWS ALB:
+  #   kubernetes.io/ingress.class: alb
+  #   alb.ingress.kubernetes.io/scheme: internet-facing
+  #   alb.ingress.kubernetes.io/target-type: ip
 
 app:
   name: app
@@ -103,7 +121,7 @@ kafka:
   enabled: true
   image: confluentinc/cp-kafka
   version: "7.4.4"
-  # This cluster ID was generated using `kafka-storage.sh random-uuid``
+  # This cluster ID was generated using `kafka-storage.sh random-uuid`
   # See: https://kafka.apache.org/documentation/#kraft
   clusterId: "vB47RqlhSd-P3ghRgNkWpQ"
   storage:
@@ -181,15 +199,6 @@ objectStorage:
       limits:
         memory: "2Gi"
         cpu: "1000m"
-
-# GKE-specific configuration
-gke:
-  # -- Enable GKE-specific features
-  enabled: true
-  # -- Name of your static IP in GKE (only used if gke.enabled is true)
-  staticIpName: "gentrace-self-hosted-test-1"
-  # -- Whether to use an internal load balancer for GKE
-  internalLb: false
 
 # TLS configuration for ingress
 tls:

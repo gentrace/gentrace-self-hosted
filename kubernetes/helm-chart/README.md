@@ -21,30 +21,138 @@ Before installing this chart, you'll need:
 - A configured storage class (see Storage Class Configuration section below)
 - Access to pull container images
 - Configured secrets (see example in `kubernetes/example-secrets/`)
+- An Ingress Controller installed and configured for your cloud provider
 
-## Quick Start
+## Cloud Provider Support
 
-1. Create a `values.yaml` file with your configuration:
+This Helm chart is designed to work with any Kubernetes cluster, including:
 
-# Storage Class Configuration
+- Azure Kubernetes Service (AKS)
+- Amazon Elastic Kubernetes Service (EKS)
+- Google Kubernetes Engine (GKE)
+- Self-hosted Kubernetes clusters
+- Other managed Kubernetes services
 
-You must specify a storage class policy for your Kubernetes cluster before deploying this Helm chart. The storage class should have an appropriate reclaim policy based on your data retention needs.
+### Cloud-Specific Configuration Examples
 
-Here's an example storage class configuration with a "Retain" policy that preserves volumes after PVC deletion:
+#### Azure Kubernetes Service (AKS)
 
+1. Storage Class Example:
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: gentrace-storage
-provisioner: kubernetes.io/gce-pd # Change based on your cloud provider
+provisioner: kubernetes.io/azure-disk
 parameters:
-  type: gp3 # Storage type, change as needed
-  fsType: ext4
+  storageaccounttype: Premium_LRS
+  kind: Managed
 reclaimPolicy: Retain
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
 ```
+
+2. Ingress Configuration (values.yaml):
+```yaml
+ingress:
+  className: azure-application-gateway
+  annotations:
+    kubernetes.io/ingress.class: azure-application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+```
+
+#### Amazon Elastic Kubernetes Service (EKS)
+
+1. Storage Class Example:
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gentrace-storage
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+```
+
+2. Ingress Configuration (values.yaml):
+```yaml
+ingress:
+  className: alb
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+```
+
+#### Google Kubernetes Engine (GKE)
+
+1. Storage Class Example:
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gentrace-storage
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+```
+
+2. Ingress Configuration (values.yaml):
+```yaml
+ingress:
+  className: gce
+  annotations:
+    kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.global-static-ip-name: "your-static-ip-name"
+```
+
+## Quick Start
+
+1. Create a `values.yaml` file with your configuration:
+
+```yaml
+# Basic configuration
+environment: prod
+app:
+  host: "your-domain.com"
+
+# Configure storage classes for your cloud provider
+postgres:
+  storage:
+    storageClass: "your-storage-class"
+
+clickhouse:
+  storage:
+    storageClass: "your-storage-class"
+
+kafka:
+  storage:
+    storageClass: "your-storage-class"
+
+# Configure ingress for your cloud provider
+ingress:
+  className: "your-ingress-class"
+  annotations:
+    # Add cloud-specific annotations here
+```
+
+2. Install the chart:
+
+```bash
+helm install gentrace ./helm-chart -f values.yaml -n your-namespace
+```
+
+# Storage Class Configuration
+
+You must specify a storage class policy for your Kubernetes cluster before deploying this Helm chart. The storage class should have an appropriate reclaim policy based on your data retention needs.
+
+See the Cloud-Specific Configuration Examples section above for storage class examples for different cloud providers.
 
 # Istio Configuration
 
@@ -152,7 +260,24 @@ stringData:
 
 ## Object Storage Configuration
 
-Create a secret for object storage access:
+Create a secret for object storage access. If using MinIO (default), use these settings:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: object-storage-credentials
+type: Opaque
+stringData:
+  STORAGE_ACCESS_KEY_ID: "minioadmin"
+  STORAGE_SECRET_ACCESS_KEY: "minioadmin"
+  STORAGE_ENDPOINT: "http://minio:9000"
+  STORAGE_BUCKET: "gentrace"
+  STORAGE_REGION: "us-east-1"
+  STORAGE_FORCE_PATH_STYLE: "true"
+```
+
+For cloud provider object storage (e.g., Azure Blob Storage, AWS S3), adjust the values accordingly:
 
 ```yaml
 apiVersion: v1
@@ -163,10 +288,10 @@ type: Opaque
 stringData:
   STORAGE_ACCESS_KEY_ID: "your-access-key"
   STORAGE_SECRET_ACCESS_KEY: "your-secret-key"
-  STORAGE_ENDPOINT: "https://storage.googleapis.com"
-  STORAGE_BUCKET: "gentrace-public"
-  STORAGE_REGION: "us-central1" # Required even for MinIO
-  STORAGE_FORCE_PATH_STYLE: "true"
+  STORAGE_ENDPOINT: "https://your-storage-endpoint"
+  STORAGE_BUCKET: "your-bucket-name"
+  STORAGE_REGION: "your-region"
+  STORAGE_FORCE_PATH_STYLE: "false"
 ```
 
 ## PostgreSQL Configuration
