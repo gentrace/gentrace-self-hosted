@@ -11,6 +11,38 @@ This Helm chart deploys a complete Gentrace self-hosted environment on Kubernete
 - Object Storage Integration (optional MinIO deployment)
 - Service Mesh (Istio) Configuration
 
+## Quick Installation
+
+1. Generate required secrets:
+
+   - Generate a JWT secret using: `openssl rand -base64 32`
+   - Generate a Prisma field encryption key at: https://cloak.47ng.com/
+   - Update these values in the example secrets file
+
+2. Create required secrets by copying and modifying the example secrets file in `kubernetes/example-secrets/all-secrets.yaml.example`, then apply with:
+
+```bash
+kubectl apply -f ../example-secrets/all-secrets.yaml.example
+```
+
+3. Invoke Helm install command:
+
+```bash
+cd <root>/kubernetes/
+helm install gentrace ./helm-chart \
+  --namespace your-namespace \
+  --values values.yaml \
+  --timeout 10m
+```
+
+4. Verify installation:
+
+```bash
+kubectl get pods -n your-namespace
+```
+
+For detailed configuration options and advanced setup, continue reading below.
+
 ## Prerequisites
 
 Before installing this chart, you'll need:
@@ -110,42 +142,6 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: gce
     kubernetes.io/ingress.global-static-ip-name: "your-static-ip-name"
-```
-
-## Quick Start
-
-1. Create a `values.yaml` file with your configuration:
-
-```yaml
-# Basic configuration
-environment: prod
-app:
-  host: "your-domain.com"
-
-# Configure storage classes for your cloud provider
-postgres:
-  storage:
-    storageClass: "your-storage-class"
-
-clickhouse:
-  storage:
-    storageClass: "your-storage-class"
-
-kafka:
-  storage:
-    storageClass: "your-storage-class"
-
-# Configure ingress for your cloud provider
-ingress:
-  className: "your-ingress-class"
-  annotations:
-    # Add cloud-specific annotations here
-```
-
-2. Install the chart:
-
-```bash
-helm install gentrace ./helm-chart -f values.yaml -n your-namespace
 ```
 
 # Storage Class Configuration
@@ -260,7 +256,7 @@ stringData:
 
 ## Object Storage Configuration
 
-Create a secret for object storage access. If using MinIO (default), use these settings:
+Create a secret for object storage access:
 
 ```yaml
 apiVersion: v1
@@ -269,29 +265,12 @@ metadata:
   name: object-storage-credentials
 type: Opaque
 stringData:
-  STORAGE_ACCESS_KEY_ID: "minioadmin"
-  STORAGE_SECRET_ACCESS_KEY: "minioadmin"
-  STORAGE_ENDPOINT: "http://minio:9000"
-  STORAGE_BUCKET: "gentrace"
-  STORAGE_REGION: "us-east-1"
-  STORAGE_FORCE_PATH_STYLE: "true"
-```
-
-For cloud provider object storage (e.g., Azure Blob Storage, AWS S3), adjust the values accordingly:
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: object-storage-credentials
-type: Opaque
-stringData:
-  STORAGE_ACCESS_KEY_ID: "your-access-key"
-  STORAGE_SECRET_ACCESS_KEY: "your-secret-key"
+  STORAGE_ACCESS_KEY_ID: "your-access-key" # If using Minio, this is the Minio user
+  STORAGE_SECRET_ACCESS_KEY: "your-secret-key" # If using Minio, this is the Minio user password
   STORAGE_ENDPOINT: "https://your-storage-endpoint"
   STORAGE_BUCKET: "your-bucket-name"
-  STORAGE_REGION: "your-region"
-  STORAGE_FORCE_PATH_STYLE: "false"
+  STORAGE_REGION: "your-region" # Required even for Minio
+  STORAGE_FORCE_PATH_STYLE: "true"
 ```
 
 ## PostgreSQL Configuration
