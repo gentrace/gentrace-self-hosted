@@ -182,7 +182,7 @@ objectStorage:
   useMinio: true
   # MinIO configuration (used when useMinio is true)
   minio:
-    image: minio/minio
+    image: bitnami/minio
     version: latest
     storage:
       size: 10Gi
