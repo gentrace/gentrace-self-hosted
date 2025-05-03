@@ -32,7 +32,7 @@ services:
       - WEBSOCKET_URL=${WEBSOCKET_URL}
       - NODE_TLS_REJECT_UNAUTHORIZED="0"
 
-      # Prisma environment variables
+      # Fake URL to ensure that Prisma doesn't try to download binaries
       - PRISMA_BINARIES_MIRROR=http://localhost:1
       - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
       - PRISMA_QUERY_ENGINE_BINARY=/app/node_modules/.prisma/client/query-engine-debian-openssl-3.0.x
