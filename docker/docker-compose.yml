@@ -1,7 +1,7 @@
 services:
   app:
     platform: linux/amd64
-    image: ${IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
+    image: ${QUAY_IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/bin/sh", "-c"]
     command: ["npm run self-hosted:migrate-and-seed && /entrypoint.sh app"]
     ports:
@@ -31,8 +31,14 @@ services:
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
       - WEBSOCKET_URL=${WEBSOCKET_URL}
       - NODE_TLS_REJECT_UNAUTHORIZED="0"
-      - PRISMA_BINARIES_MIRROR=http://prisma-builds.s3-eu-west-1.amazonaws.com
-      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING="1"
+
+      # Prisma environment variables
+      - PRISMA_BINARIES_MIRROR=http://localhost:1
+      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
+      - PRISMA_QUERY_ENGINE_BINARY=/app/node_modules/.prisma/client/query-engine-debian-openssl-3.0.x
+      - PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/@prisma/engines/libquery_engine-debian-openssl-3.0.x.so.node
+      - PRISMA_SCHEMA_ENGINE_BINARY=/app/node_modules/@prisma/engines/schema-engine-debian-openssl-3.0.x
+
       - NODE_ENV=${NODE_ENV}
       - ENVIRONMENT=${ENVIRONMENT}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
@@ -50,7 +56,7 @@ services:
   # service will not be accessible externally.
   websocket-server:
     platform: linux/amd64
-    image: ${IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
+    image: ${QUAY_IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/entrypoint.sh"]
     command: ["websocket"]
     restart: unless-stopped
@@ -79,7 +85,7 @@ services:
 
   taskrunner:
     platform: linux/amd64
-    image: ${IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
+    image: ${QUAY_IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/entrypoint.sh"]
     command: ["taskrunner"]
     environment:
@@ -110,7 +116,7 @@ services:
 
   taskscheduler:
     platform: linux/amd64
-    image: ${IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
+    image: ${QUAY_IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
     entrypoint: ["/entrypoint.sh"]
     command: ["taskscheduler"]
     environment:
@@ -134,7 +140,7 @@ services:
         condition: service_healthy
 
   postgres:
-    image: postgres:15.3
+    image: ${DOCKER_REGISTRY_URL_PREFIX:+$DOCKER_REGISTRY_URL_PREFIX/}postgres:15.3
     environment:
       # Change these values for production use
       - POSTGRES_USER=${POSTGRES_USER}
@@ -151,7 +157,7 @@ services:
       retries: 5
 
   kafka:
-    image: confluentinc/cp-kafka:7.4.4
+    image: ${DOCKER_REGISTRY_URL_PREFIX:+$DOCKER_REGISTRY_URL_PREFIX/}confluentinc/cp-kafka:7.4.4
     ports:
       - "9092:9092"
       - "29092:29092"
@@ -178,7 +184,7 @@ services:
       - kafka_data:/var/lib/kafka/data
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
+    image: ${DOCKER_REGISTRY_URL_PREFIX:+$DOCKER_REGISTRY_URL_PREFIX/}provectuslabs/kafka-ui:latest
     environment:
       - DYNAMIC_CONFIG_ENABLED=true
     ports:
@@ -190,7 +196,7 @@ services:
 
   kafka-connect:
     platform: linux/amd64
-    image: ${IMAGE_URL_PREFIX:-quay.io}/gentrace/kafka-connect-clickhouse
+    image: ${QUAY_IMAGE_URL_PREFIX:-quay.io}/gentrace/kafka-connect-clickhouse
     ports:
       - "8083:8083"
     environment:
@@ -210,7 +216,7 @@ services:
         condition: service_healthy
 
   minio:
-    image: minio/minio:latest
+    image: ${DOCKER_REGISTRY_URL_PREFIX:+$DOCKER_REGISTRY_URL_PREFIX/}minio/minio:latest
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -223,7 +229,7 @@ services:
       - minio_data:/data
 
   clickhouse:
-    image: clickhouse/clickhouse-server:24.8
+    image: ${DOCKER_REGISTRY_URL_PREFIX:+$DOCKER_REGISTRY_URL_PREFIX/}clickhouse/clickhouse-server:24.8
     ports:
       - "8123:8123" # http port
       - "9100:9000" # native port
