@@ -2,7 +2,7 @@
 
 This guide explains how to obtain and use the Gentrace VM image for deployment on Google Cloud Platform (GCP).
 
-## Step 1: Copy the VMDK image to your GCS bucket
+### Step 1: Copy the VMDK image to your GCS bucket
 
 The VMDK image is publicly available on Google Cloud Storage. You can copy it directly to your own GCS bucket using the `gsutil` command-line tool.
 
