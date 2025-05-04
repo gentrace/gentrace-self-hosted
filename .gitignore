@@ -45,3 +45,4 @@ postgres_data
 *.tar
 
 design-docs
+packer
