@@ -1,4 +1,4 @@
-### Gentrace VM Image for GCP
+## Gentrace VM Image for GCP
 
 This guide explains how to obtain and use the Gentrace VM image for deployment on Google Cloud Platform (GCP).
 
