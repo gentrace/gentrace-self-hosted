@@ -14,8 +14,14 @@ Then, run the following command to copy the image to your bucket. Replace `YOUR_
 gsutil cp gs://gentrace-vm-images/gentrace-custom-ubuntu-export-test.vmdk gs://YOUR_BUCKET_NAME/
 ```
 
+**Alternative Methods:**
+
 > [!WARNING]
-> You can also download the image to your local machine first (`gsutil cp gs://gentrace-vm-images/gentrace-custom-ubuntu-export-test.vmdk .`) and then upload it to your bucket (`gsutil cp gentrace-custom-ubuntu-export-test.vmdk gs://YOUR_BUCKET_NAME/`). However, copying directly between buckets is usually faster, as the VMDK file is large. Regardless of the method chosen, the VMDK file must be in a GCS bucket before proceeding to the next step.
+> You can also download the image to your local machine first using `gsutil` (`gsutil cp gs://gentrace-vm-images/gentrace-custom-ubuntu-export-test.vmdk .`) or directly via your web browser:
+>
+> [`https://storage.googleapis.com/gentrace-vm-images/gentrace-custom-ubuntu-export-test.vmdk`](https://storage.googleapis.com/gentrace-vm-images/gentrace-custom-ubuntu-export-test.vmdk)
+>
+> Afterwards, you must upload it to your own GCS bucket (`gsutil cp gentrace-custom-ubuntu-export-test.vmdk gs://YOUR_BUCKET_NAME/`). Copying directly between buckets using `gsutil cp gs://... gs://...` is usually faster, as the VMDK file is large. Regardless of the method chosen, the VMDK file must be in a GCS bucket before proceeding to the next step.
 
 ### Step 2: Import the VMDK as a GCP Image
 
