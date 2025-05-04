@@ -17,7 +17,7 @@ gsutil cp gs://gentrace-vm-images/gentrace-custom-ubuntu-export-test.vmdk gs://Y
 > [!WARNING]
 > You can also download the image to your local machine first (`gsutil cp gs://gentrace-vm-images/gentrace-custom-ubuntu-export-test.vmdk .`) and then upload it to your bucket (`gsutil cp gentrace-custom-ubuntu-export-test.vmdk gs://YOUR_BUCKET_NAME/`). However, copying directly between buckets is usually faster, as the VMDK file is large. Regardless of the method chosen, the VMDK file must be in a GCS bucket before proceeding to the next step.
 
-## Step 2: Import the VMDK as a GCP Image
+### Step 2: Import the VMDK as a GCP Image
 
 Once the VMDK file is in your GCS bucket, you can import it as a custom image in Compute Engine.
 
@@ -42,7 +42,7 @@ Once the VMDK file is in your GCS bucket, you can import it as a custom image in
     > [!NOTE]
     > The import process can take 30 minutes to an hour to complete.
 
-## Step 3: Create a VM Instance from the Image
+### Step 3: Create a VM Instance from the Image
 
 Once the image import is complete, you can use it to create a new VM instance.
 
@@ -65,7 +65,7 @@ Once the image import is complete, you can use it to create a new VM instance.
     - Adjust other settings like **Networking**, **Disks**, etc., as required for your application.
 6.  Click **Create** to launch the VM instance.
 
-## Step 4: Access the VM Instance via SSH
+### Step 4: Access the VM Instance via SSH
 
 To access the newly created VM instance, you will need a specific SSH key pair.
 
@@ -91,7 +91,7 @@ To access the newly created VM instance, you will need a specific SSH key pair.
     ssh -i ~/.ssh/self_hosted ubuntu@<ip-of-gentrace-instance>
     ```
 
-## Step 5: Start the Gentrace Application
+### Step 5: Start the Gentrace Application
 
 Once you have successfully connected to the VM instance via SSH, you will see instructions printed in the terminal for starting the Gentrace application, similar to the image below:
 
@@ -125,7 +125,7 @@ Follow these steps to start the application:
 
 Your Gentrace instance should now be running.
 
-### Resetting the Environment (Optional)
+#### Resetting the Environment (Optional)
 
 If you need to completely reset the application state, including deleting all stored data, you can stop the services and remove the associated Docker volumes. **Warning: This action is irreversible and will delete all data.**
 
