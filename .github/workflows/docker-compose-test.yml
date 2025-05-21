@@ -28,6 +28,10 @@ jobs:
         run: |
           echo "JWT_SECRET=$(openssl rand -hex 32)" > docker/.env
           echo "PRISMA_FIELD_ENCRYPTION_KEY=$(openssl rand -hex 32)" >> docker/.env
+          # Add default database credentials for testing
+          echo "POSTGRES_USER=postgres" >> docker/.env
+          echo "POSTGRES_PASSWORD=postgres" >> docker/.env
+          echo "POSTGRES_DB=postgres" >> docker/.env
 
       - name: Start services with Docker Compose
         run: |
@@ -82,4 +86,3 @@ jobs:
             exit 1
           fi
           echo "Login test passed!"
-
