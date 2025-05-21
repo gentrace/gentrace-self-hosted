@@ -1,0 +1,22 @@
+# ... existing code ...
+      - name: Test API endpoints
+        working-directory: ./docker
+        run: |
+          echo "Testing API endpoints..."
+          
+          # Wait for API to be ready
+          echo "Waiting for API to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/api/health | grep -q "ok"; then
+              echo "API is ready!"
+              break
+            fi
+            echo "API not ready yet, retrying..."
+            sleep 2
+          done
+
+          # Test login with admin credentials
+          echo "Testing login..."
+          LOGIN_RESPONSE=$(curl -s -X POST http://localhost:3000/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"test@gentrace.ai","password":"TestPassword123"}')
