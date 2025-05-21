@@ -38,3 +38,6 @@ For support with any deployment method:
 
 - Email [support@gentraceai.com](mailto:support@gentraceai.com)
 - Refer to our [documentation](https://gentrace.ai/docs)
+
+> **ℹ️ INFO**
+> If you need a VMDK image for GCP deployment, contact [support@gentrace.ai](mailto:support@gentrace.ai). We'll provide separate instructions.
