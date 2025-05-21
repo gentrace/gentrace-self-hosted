@@ -38,8 +38,8 @@ jobs:
       - name: Start services with Docker Compose
         run: |
           cd docker
-          # Start services but allow failures to continue for diagnostics
-          docker compose up -d || true
+          # Start services with explicit env-file and allow failures to continue for diagnostics
+          docker compose --env-file .env up -d || true
 
       - name: Wait for services to be healthy
         run: |
@@ -57,12 +57,21 @@ jobs:
       - name: Check logs for errors
         run: |
           cd docker
-          # Print service status and full logs for diagnosis
-          echo "Service status:" \
-          && docker compose ps
-          echo "Container logs:" \
-          && docker compose logs --no-color
-          # Check for error keywords
+          # Dump Postgres container logs via compose to capture startup errors
+          POSTGRES_ID=$(docker compose ps -q postgres) && echo "Postgres container ID: $POSTGRES_ID"
+          if [ -n "$POSTGRES_ID" ]; then
+            echo "=== Postgres Logs ==="
+            docker logs "$POSTGRES_ID"
+          else
+            echo "No Postgres container found."
+          fi
+          # Print full docker-compose logs
+          echo "=== Full Docker Compose Logs ==="
+          docker compose logs --no-color
+          # Show service status
+          echo "=== Service Status ==="
+          docker compose ps
+          # Fail if any errors in logs
           if docker compose logs --no-color | grep -i "error"; then
             echo "Errors found in logs."
             exit 1
