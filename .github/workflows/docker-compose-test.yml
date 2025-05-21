@@ -32,6 +32,8 @@ jobs:
           echo "POSTGRES_USER=postgres" >> docker/.env
           echo "POSTGRES_PASSWORD=postgres" >> docker/.env
           echo "POSTGRES_DB=postgres" >> docker/.env
+          # Add default DATABASE_URL for services
+          echo "DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres" >> docker/.env
 
       - name: Start services with Docker Compose
         run: |
