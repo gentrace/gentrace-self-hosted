@@ -21,6 +21,17 @@ This directory contains everything you need to run Gentrace locally using Docker
 
 ## Quick Start
 
+1. Start the services:
+
+   ```bash
+   docker compose up -d
+   ```
+
+2. Access the services:
+   - Web App: http://localhost:3000
+   - Kafka UI: http://localhost:8080
+   - MinIO Console: http://localhost:9001 (credentials: minioadmin/minioadmin)
+
 > [!TIP]
 > To pull images through your organization's proxy registry, update the image prefix variables in your `docker/.env.example` (or project root `.env.example`) file:
 >
@@ -34,17 +45,6 @@ This directory contains everything you need to run Gentrace locally using Docker
 > ```bash
 > docker compose up -d
 > ```
-
-1. Start the services:
-
-   ```bash
-   docker compose up -d
-   ```
-
-2. Access the services:
-   - Web App: http://localhost:3000
-   - Kafka UI: http://localhost:8080
-   - MinIO Console: http://localhost:9001 (credentials: minioadmin/minioadmin)
 
 ## Services Overview
 
