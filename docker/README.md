@@ -77,7 +77,7 @@ The following tables list all required environment variables for each service:
 | CLICKHOUSE_USER             | ClickHouse username               | default                                                  |
 | DATABASE_URL                | Full PostgreSQL connection string | postgresql://gentrace:gentrace123@postgres:5432/gentrace |
 | ENVIRONMENT                 | Deployment environment identifier | production                                               |
-| JWT_SECRET                  | JWT token secret key              | Generated using: openssl rand -base64 32                 |
+| JWT_SECRET                  | JWT token secret key              | Generated using: `openssl rand -base64 32`                 |
 | KAFKA_BROKER                | Kafka broker hostname             | kafka                                                    |
 | KAFKA_PORT                  | Kafka broker port                 | 9092                                                     |
 | NEXT_PUBLIC_SELF_HOSTED     | Self-hosted deployment flag       | true                                                     |
@@ -108,7 +108,7 @@ The following tables list all required environment variables for each service:
 | CLICKHOUSE_USER             | ClickHouse username                   | default                                                  |
 | DATABASE_URL                | Full PostgreSQL connection string     | postgresql://gentrace:gentrace123@postgres:5432/gentrace |
 | ENVIRONMENT                 | Deployment environment identifier     | production                                               |
-| JWT_SECRET                  | JWT token secret key                  | Generated using: openssl rand -base64 32                 |
+| JWT_SECRET                  | JWT token secret key                  | Generated using: `openssl rand -base64 32`                 |
 | KAFKA_BROKER                | Kafka broker hostname                 | kafka                                                    |
 | KAFKA_PORT                  | Kafka broker port                     | 9092                                                     |
 | NEXT_PUBLIC_SELF_HOSTED     | Self-hosted deployment flag           | true                                                     |
@@ -139,7 +139,7 @@ The following tables list all required environment variables for each service:
 | CLICKHOUSE_USER             | ClickHouse username               | default                                                  |
 | DATABASE_URL                | Full PostgreSQL connection string | postgresql://gentrace:gentrace123@postgres:5432/gentrace |
 | ENVIRONMENT                 | Deployment environment identifier | production                                               |
-| JWT_SECRET                  | JWT token secret key              | Generated using: openssl rand -base64 32                 |
+| JWT_SECRET                  | JWT token secret key              | Generated using: `openssl rand -base64 32`                 |
 | KAFKA_BROKER                | Kafka broker hostname             | kafka                                                    |
 | KAFKA_PORT                  | Kafka broker port                 | 9092                                                     |
 | NEXT_PUBLIC_SELF_HOSTED     | Self-hosted deployment flag       | true                                                     |
@@ -169,7 +169,7 @@ The following tables list all required environment variables for each service:
 | CLICKHOUSE_USER             | ClickHouse username               | default                                                  |
 | DATABASE_URL                | Full PostgreSQL connection string | postgresql://gentrace:gentrace123@postgres:5432/gentrace |
 | ENVIRONMENT                 | Deployment environment identifier | production                                               |
-| JWT_SECRET                  | JWT token secret key              | Generated using: openssl rand -base64 32                 |
+| JWT_SECRET                  | JWT token secret key              | Generated using: `openssl rand -base64 32`                 |
 | KAFKA_BROKER                | Kafka broker hostname             | kafka                                                    |
 | KAFKA_PORT                  | Kafka broker port                 | 9092                                                     |
 | NEXT_PUBLIC_SELF_HOSTED     | Self-hosted deployment flag       | true                                                     |
