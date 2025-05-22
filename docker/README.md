@@ -1,6 +1,7 @@
 # Gentrace Self-Hosted Docker Setup
 
-⚠️ **Development Only**: This Docker setup is for local development and testing. Not suitable for production use.
+> **⚠️ Development Only**  
+> This Docker setup is for local development and testing. Not suitable for production use.
 
 This directory contains everything you need to run Gentrace locally using Docker Compose.
 
