@@ -21,7 +21,8 @@ This directory contains everything you need to run Gentrace locally using Docker
 
 ## Quick Start
 
-> **TIP:** To pull images through your organization's proxy registry, update the image prefix variables in your `docker/.env.example` (or project root `.env.example`) file:
+> [!TIP]
+> To pull images through your organization's proxy registry, update the image prefix variables in your `docker/.env.example` (or project root `.env.example`) file:
 >
 > ```bash
 > QUAY_IMAGE_URL_PREFIX=<your-proxy-registry>/quay.io
