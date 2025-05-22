@@ -10,16 +10,17 @@ BUCKET_NAME=${STORAGE_BUCKET:-gentrace-public}
 ACCESS_KEY=${STORAGE_ACCESS_KEY_ID:-minioadmin}
 SECRET_KEY=${STORAGE_SECRET_ACCESS_KEY:-minioadmin}
 
+echo "Configuring mc client for MinIO checks..."
+mc alias set minio "$MINIO_ENDPOINT" "$ACCESS_KEY" "$SECRET_KEY" --api "s3v4"
+
 echo "Waiting for MinIO to be ready..."
-until curl -f "$MINIO_ENDPOINT/minio/health/live" > /dev/null 2>&1; do
+until mc admin info minio --json > /dev/null 2>&1; do
     echo "MinIO not ready yet, waiting..."
     sleep 2
 done
 
-echo "MinIO is ready. Configuring mc client..."
-
-# Configure MinIO client
-mc alias set minio "$MINIO_ENDPOINT" "$ACCESS_KEY" "$SECRET_KEY"
+echo "MinIO is ready."
+# No need to re-configure mc client here as it was done above for the check
 
 # Check if bucket exists, create if it doesn't
 if mc ls minio/"$BUCKET_NAME" > /dev/null 2>&1; then
