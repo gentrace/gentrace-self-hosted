@@ -193,18 +193,6 @@ The following tables list all required environment variables for each service:
 | ADMIN_NAME     | Initial admin user name     | Admin User                 |
 | ADMIN_PASSWORD | Initial admin user password | your-secure-admin-password |
 
-## Environment Setup
-
-To set up your environment variables:
-
-For Unix-based systems (Linux/Mac):
-
-```bash
-./environment/setup-env.sh
-```
-
-These scripts will help you generate secure values and create a `.env` file with all necessary configurations.
-
 ## Troubleshooting
 
 View logs for a specific service:
