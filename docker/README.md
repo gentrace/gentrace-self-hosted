@@ -21,10 +21,18 @@ This directory contains everything you need to run Gentrace locally using Docker
 
 ## Quick Start
 
-> **TIP:** In more locked-down environments, you may need to pull images through a proxy registry. For example:
-> - Quay images: `quay-proxy.example.com/quay.io/<image>`
-> - Docker Hub images: `dockerhub-proxy.example.com/library/<image>`
-> Replace these prefixes with your organization's proxy registry.
+> **TIP:** To pull images through your organization's proxy registry, update the image prefix variables in your `docker/.env.example` (or project root `.env.example`) file:
+>
+> ```bash
+> QUAY_IMAGE_URL_PREFIX=<your-proxy-registry>/quay.io
+> DOCKER_REGISTRY_URL_PREFIX=<your-proxy-registry>/library
+> ```
+>
+> After saving your changes, restart the services:
+>
+> ```bash
+> docker compose up -d
+> ```
 
 1. Start the services:
 
