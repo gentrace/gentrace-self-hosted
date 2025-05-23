@@ -1,0 +1,247 @@
+name: Docker Compose Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docker/**"
+      - ".github/workflows/docker-compose-test.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docker/**"
+      - ".github/workflows/docker-compose-test.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test Docker Compose Setup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Generate .env file with all required variables
+        run: |
+          cd docker
+          cat > .env << EOF
+          # Security
+          JWT_SECRET=$(openssl rand -hex 32)
+          PRISMA_FIELD_ENCRYPTION_KEY=k1.aesgcm256.7UUD7t-nSozdo2GUD4-MIgqpUMql4s0nlbnswjvQ9Ik=
+
+          # Common Settings
+          NODE_ENV=production
+          ENVIRONMENT=production
+          NEXT_PUBLIC_SELF_HOSTED=true
+          NEXT_PUBLIC_SELF_HOSTED_TLS=false
+          PORT=3000
+          PUBLIC_HOSTNAME=localhost
+          WEBSOCKET_URL=ws://localhost:3001
+
+          # Admin Configuration
+          ADMIN_EMAIL=admin@gentrace.ai
+          ADMIN_NAME=Admin User
+          ADMIN_PASSWORD=TestPassword123
+
+          # PostgreSQL Configuration
+          POSTGRES_USER=gentrace
+          POSTGRES_PASSWORD=gentrace123
+          POSTGRES_DB=gentrace
+          DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
+
+          # ClickHouse Configuration
+          CLICKHOUSE_DATABASE=gentrace
+          CLICKHOUSE_HOST=clickhouse
+          CLICKHOUSE_PORT=8123
+          CLICKHOUSE_PROTOCOL=http
+          CLICKHOUSE_USER=default
+          CLICKHOUSE_PASSWORD=gentrace123
+
+          # Kafka Configuration
+          CONNECT_BOOTSTRAP_SERVERS=kafka:9092
+          CONNECT_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+          CONNECT_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+
+          # Object Storage Configuration (MinIO for local testing)
+          STORAGE_ACCESS_KEY_ID=minioadmin
+          STORAGE_SECRET_ACCESS_KEY=minioadmin
+          STORAGE_ENDPOINT=http://minio:9000
+          STORAGE_BUCKET=gentrace-public
+          STORAGE_REGION=us-east-1
+          STORAGE_FORCE_PATH_STYLE=true
+
+          # MinIO Configuration
+          MINIO_ROOT_USER=minioadmin
+          MINIO_ROOT_PASSWORD=minioadmin
+
+          # Docker Registry (empty for Docker Hub)
+          DOCKER_REGISTRY_URL_PREFIX=
+          EOF
+
+      - name: Create MinIO bucket
+        run: |
+          cd docker
+          docker compose up -d minio
+          sleep 10
+          docker compose exec -T minio mc alias set myminio http://localhost:9000 minioadmin minioadmin
+          docker compose exec -T minio mc mb myminio/gentrace-public || true
+
+      - name: Start services with Docker Compose
+        run: |
+          cd docker
+          docker compose up -d
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          cd docker
+          echo "Waiting for PostgreSQL..."
+          for i in {1..30}; do
+            if docker compose exec -T postgres pg_isready -U gentrace; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "PostgreSQL not ready, retrying..."
+            sleep 2
+          done
+
+      - name: Wait for ClickHouse to be ready
+        run: |
+          cd docker
+          echo "Waiting for ClickHouse..."
+          for i in {1..30}; do
+            if curl -s http://localhost:8123/ping; then
+              echo "ClickHouse is ready!"
+              break
+            fi
+            echo "ClickHouse not ready, retrying..."
+            sleep 2
+          done
+
+      - name: Wait for Kafka to be ready
+        run: |
+          cd docker
+          echo "Waiting for Kafka..."
+          for i in {1..30}; do
+            if docker compose exec -T kafka kafka-topics --bootstrap-server localhost:9092 --list 2>/dev/null; then
+              echo "Kafka is ready!"
+              break
+            fi
+            echo "Kafka not ready, retrying..."
+            sleep 2
+          done
+
+      - name: Check service status
+        run: |
+          cd docker
+          docker compose ps
+          echo "Checking app logs..."
+          docker compose logs app --tail=50
+
+      - name: Test app homepage
+        run: |
+          cd docker
+          echo "Testing app homepage..."
+
+          # Wait a bit for the app to fully initialize after Next.js says it's ready
+          sleep 10
+
+          for i in {1..60}; do
+            # Check if container is running first
+            if ! docker compose ps app | grep -q "Up"; then
+              echo "App container is not running!"
+              docker compose ps app
+              docker compose logs app --tail=20
+              sleep 5
+              continue
+            fi
+            
+            # Try to connect with curl
+            echo "Attempt $i - Testing http://localhost:3000..."
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "000")
+            CURL_EXIT=$?
+            
+            echo "HTTP Code: $HTTP_CODE"
+            
+            # Accept any 2xx or 3xx response as success
+            if [[ "$HTTP_CODE" =~ ^[23][0-9][0-9]$ ]]; then
+              echo "App is responding with HTTP $HTTP_CODE - Success!"
+              exit 0
+            fi
+            
+            # If we're getting a 4xx or 5xx, that's still a response
+            if [[ "$HTTP_CODE" =~ ^[45][0-9][0-9]$ ]]; then
+              echo "App is responding but with error code $HTTP_CODE"
+              echo "Fetching full response:"
+              curl -s http://localhost:3000 || true
+            fi
+            
+            echo "App not ready, retrying in 5 seconds..."
+            sleep 5
+          done
+
+          echo "App failed to become ready after all retries"
+          docker compose logs app --tail=50
+          exit 1
+
+      - name: Test websocket server homepage
+        run: |
+          cd docker
+          echo "Testing websocket server homepage..."
+
+          for i in {1..60}; do
+            # Check if container is running first
+            if ! docker compose ps websocket-server | grep -q "Up"; then
+              echo "WebSocket server container is not running!"
+              docker compose ps websocket-server
+              docker compose logs websocket-server --tail=20
+              sleep 5
+              continue
+            fi
+            
+            # Try to connect with curl
+            echo "Attempt $i - Testing http://localhost:3001..."
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001 2>/dev/null || echo "000")
+            CURL_EXIT=$?
+            
+            echo "WebSocket server HTTP Code: $HTTP_CODE"
+            
+            # Accept any 2xx or 3xx response as success
+            if [[ "$HTTP_CODE" =~ ^[23][0-9][0-9]$ ]]; then
+              echo "WebSocket server is responding with HTTP $HTTP_CODE - Success!"
+              exit 0
+            fi
+            
+            # If we're getting a 4xx or 5xx, that's still a response
+            if [[ "$HTTP_CODE" =~ ^[45][0-9][0-9]$ ]]; then
+              echo "WebSocket server is responding but with error code $HTTP_CODE"
+              echo "Fetching full response:"
+              curl -s http://localhost:3001 || true
+            fi
+            
+            echo "WebSocket server not ready, retrying in 5 seconds..."
+            sleep 5
+          done
+
+          echo "WebSocket server failed to become ready after all retries"
+          docker compose logs websocket-server --tail=50
+          exit 1
+
+      - name: Cleanup on failure
+        if: failure()
+        run: |
+          cd docker
+          echo "=== App logs ==="
+          docker compose logs app --tail=100
+          echo "=== WebSocket server logs ==="
+          docker compose logs websocket-server --tail=50
+          echo "=== PostgreSQL logs ==="
+          docker compose logs postgres --tail=50
+          echo "=== Kafka logs ==="
+          docker compose logs kafka --tail=50
+          echo "=== ClickHouse logs ==="
+          docker compose logs clickhouse --tail=50
+          echo "=== All container status ==="
+          docker compose ps
