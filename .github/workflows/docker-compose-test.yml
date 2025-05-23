@@ -280,4 +280,4 @@ jobs:
               "message": "Docker Compose test failed in self-hosted repo: https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WORKFLOW_DOCKER_COMPOSE_TEST_FAILED }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WORKFLOW_STAGING_BUILD_FAILED }}
