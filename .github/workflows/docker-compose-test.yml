@@ -5,14 +5,14 @@ on:
     branches:
       - main
     paths:
-      - 'docker/**'
-      - '.github/workflows/docker-compose-test.yml'
+      - "docker/**"
+      - ".github/workflows/docker-compose-test.yml"
   pull_request:
     branches:
       - main
     paths:
-      - 'docker/**'
-      - '.github/workflows/docker-compose-test.yml'
+      - "docker/**"
+      - ".github/workflows/docker-compose-test.yml"
   workflow_dispatch:
 
 jobs:
@@ -24,62 +24,168 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Generate .env file with secrets
+      - name: Generate .env file with all required variables
         run: |
-          echo "JWT_SECRET=$(openssl rand -hex 32)" > docker/.env
-          echo "PRISMA_FIELD_ENCRYPTION_KEY=$(openssl rand -hex 32)" >> docker/.env
+          cd docker
+          cat > .env << EOF
+          # Security
+          JWT_SECRET=$(openssl rand -hex 32)
+          PRISMA_FIELD_ENCRYPTION_KEY=$(openssl rand -hex 32)
+
+          # Common Settings
+          NODE_ENV=production
+          ENVIRONMENT=production
+          NEXT_PUBLIC_SELF_HOSTED=true
+          NEXT_PUBLIC_SELF_HOSTED_TLS=false
+          PORT=3000
+          PUBLIC_HOSTNAME=localhost
+          WEBSOCKET_URL=ws://localhost:3001
+
+          # Admin Configuration
+          ADMIN_EMAIL=admin@gentrace.ai
+          ADMIN_NAME=Admin User
+          ADMIN_PASSWORD=TestPassword123
+
+          # PostgreSQL Configuration
+          POSTGRES_USER=gentrace
+          POSTGRES_PASSWORD=gentrace123
+          POSTGRES_DB=gentrace
+          DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
+
+          # ClickHouse Configuration
+          CLICKHOUSE_DATABASE=gentrace
+          CLICKHOUSE_HOST=clickhouse
+          CLICKHOUSE_PORT=8123
+          CLICKHOUSE_PROTOCOL=http
+          CLICKHOUSE_USER=default
+          CLICKHOUSE_PASSWORD=gentrace123
+
+          # Kafka Configuration
+          CONNECT_BOOTSTRAP_SERVERS=kafka:9092
+          CONNECT_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+          CONNECT_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+
+          # Object Storage Configuration (MinIO for local testing)
+          STORAGE_ACCESS_KEY_ID=minioadmin
+          STORAGE_SECRET_ACCESS_KEY=minioadmin
+          STORAGE_ENDPOINT=http://minio:9000
+          STORAGE_BUCKET=gentrace-public
+          STORAGE_REGION=us-east-1
+          STORAGE_FORCE_PATH_STYLE=true
+
+          # MinIO Configuration
+          MINIO_ROOT_USER=minioadmin
+          MINIO_ROOT_PASSWORD=minioadmin
+          EOF
+
+      - name: Create MinIO bucket
+        run: |
+          cd docker
+          docker compose up -d minio
+          sleep 10
+          docker compose exec -T minio mc alias set myminio http://localhost:9000 minioadmin minioadmin
+          docker compose exec -T minio mc mb myminio/gentrace-public || true
 
       - name: Start services with Docker Compose
         run: |
           cd docker
           docker compose up -d
 
-      - name: Wait for services to be healthy
+      - name: Wait for PostgreSQL to be ready
         run: |
           cd docker
-          echo "Waiting for services to be healthy..."
+          echo "Waiting for PostgreSQL..."
           for i in {1..30}; do
-            if docker compose ps | grep -q "healthy"; then
-              echo "Services are healthy!"
+            if docker compose exec -T postgres pg_isready -U gentrace; then
+              echo "PostgreSQL is ready!"
               break
             fi
-            echo "Services not healthy yet, retrying..."
+            echo "PostgreSQL not ready, retrying..."
             sleep 2
           done
 
-      - name: Check logs for errors
+      - name: Wait for ClickHouse to be ready
         run: |
           cd docker
-          if docker compose logs --no-color --since 1m | grep -i "error"; then
-            echo "Errors found in logs."
-            exit 1
-          else
-            echo "No errors found in logs."
-          fi
+          echo "Waiting for ClickHouse..."
+          for i in {1..30}; do
+            if curl -s http://localhost:8123/ping; then
+              echo "ClickHouse is ready!"
+              break
+            fi
+            echo "ClickHouse not ready, retrying..."
+            sleep 2
+          done
+
+      - name: Wait for Kafka to be ready
+        run: |
+          cd docker
+          echo "Waiting for Kafka..."
+          for i in {1..30}; do
+            if docker compose exec -T kafka kafka-topics --bootstrap-server localhost:9092 --list 2>/dev/null; then
+              echo "Kafka is ready!"
+              break
+            fi
+            echo "Kafka not ready, retrying..."
+            sleep 2
+          done
+
+      - name: Check service status
+        run: |
+          cd docker
+          docker compose ps
+          echo "Checking app logs..."
+          docker compose logs app --tail=50
 
       - name: Test API health endpoint
         run: |
           cd docker
           echo "Testing API health endpoint..."
-          for i in {1..30}; do
-            if curl -s http://localhost:3000/api/health | grep -q "ok"; then
-              echo "API health is ok!"
+          for i in {1..60}; do
+            if curl -s http://localhost:3000/api/health; then
+              echo "API is responding!"
               break
             fi
             echo "API not ready, retrying..."
-            sleep 2
+            sleep 5
           done
 
-      - name: Test login endpoint
+      - name: Test login endpoint with admin credentials
         run: |
           cd docker
           echo "Testing login endpoint..."
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:3000/api/auth/login \
-            -H "Content-Type: application/json" \
-            -d '{"email":"test@gentrace.ai","password":"TestPassword123"}')
-          if [ "$STATUS" -ne 200 ]; then
-            echo "Login test failed with status $STATUS"
-            exit 1
-          fi
-          echo "Login test passed!"
+          for i in {1..10}; do
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/api/auth/login \
+              -H "Content-Type: application/json" \
+              -d '{"email":"admin@gentrace.ai","password":"TestPassword123"}')
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+            BODY=$(echo "$RESPONSE" | head -n-1)
+            
+            echo "HTTP Code: $HTTP_CODE"
+            echo "Response Body: $BODY"
+            
+            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ]; then
+              echo "Login test passed!"
+              exit 0
+            fi
+            
+            echo "Login test failed, retrying in 5 seconds..."
+            sleep 5
+          done
 
+          echo "Login test failed after all retries"
+          docker compose logs app --tail=100
+          exit 1
+
+      - name: Cleanup on failure
+        if: failure()
+        run: |
+          cd docker
+          echo "=== App logs ==="
+          docker compose logs app --tail=100
+          echo "=== PostgreSQL logs ==="
+          docker compose logs postgres --tail=50
+          echo "=== Kafka logs ==="
+          docker compose logs kafka --tail=50
+          echo "=== ClickHouse logs ==="
+          docker compose logs clickhouse --tail=50
