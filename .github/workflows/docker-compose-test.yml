@@ -30,7 +30,7 @@ jobs:
           cat > .env << EOF
           # Security
           JWT_SECRET=$(openssl rand -hex 32)
-          PRISMA_FIELD_ENCRYPTION_KEY=$(openssl rand -hex 32)
+          PRISMA_FIELD_ENCRYPTION_KEY=k1.aesgcm256.7UUD7t-nSozdo2GUD4-MIgqpUMql4s0nlbnswjvQ9Ik=
 
           # Common Settings
           NODE_ENV=production
