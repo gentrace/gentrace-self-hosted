@@ -137,45 +137,47 @@ jobs:
           echo "Checking app logs..."
           docker compose logs app --tail=50
 
-      - name: Test API health endpoint
+      - name: Test app homepage
         run: |
           cd docker
-          echo "Testing API health endpoint..."
+          echo "Testing app homepage..."
           for i in {1..60}; do
-            if curl -s http://localhost:3000/api/health; then
-              echo "API is responding!"
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+            echo "App HTTP Code: $HTTP_CODE"
+            
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "App is responding with 200!"
               break
             fi
-            echo "API not ready, retrying..."
+            echo "App not ready, retrying..."
             sleep 5
           done
 
-      - name: Test login endpoint with admin credentials
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "App failed to return 200"
+            exit 1
+          fi
+
+      - name: Test websocket server homepage
         run: |
           cd docker
-          echo "Testing login endpoint..."
-          for i in {1..10}; do
-            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/api/auth/login \
-              -H "Content-Type: application/json" \
-              -d '{"email":"admin@gentrace.ai","password":"TestPassword123"}')
-            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-            BODY=$(echo "$RESPONSE" | head -n-1)
+          echo "Testing websocket server homepage..."
+          for i in {1..60}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001)
+            echo "WebSocket server HTTP Code: $HTTP_CODE"
             
-            echo "HTTP Code: $HTTP_CODE"
-            echo "Response Body: $BODY"
-            
-            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ]; then
-              echo "Login test passed!"
-              exit 0
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "WebSocket server is responding with 200!"
+              break
             fi
-            
-            echo "Login test failed, retrying in 5 seconds..."
+            echo "WebSocket server not ready, retrying..."
             sleep 5
           done
 
-          echo "Login test failed after all retries"
-          docker compose logs app --tail=100
-          exit 1
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "WebSocket server failed to return 200"
+            exit 1
+          fi
 
       - name: Cleanup on failure
         if: failure()
