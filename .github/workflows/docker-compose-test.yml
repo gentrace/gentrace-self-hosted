@@ -142,42 +142,80 @@ jobs:
           cd docker
           echo "Testing app homepage..."
           for i in {1..60}; do
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
-            echo "App HTTP Code: $HTTP_CODE"
+            # Check if container is running first
+            if ! docker compose ps app | grep -q "running"; then
+              echo "App container is not running!"
+              docker compose ps app
+              docker compose logs app --tail=20
+              sleep 5
+              continue
+            fi
+            
+            # Try to connect with curl, capture both response and exit code
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "000")
+            CURL_EXIT=$?
+            
+            if [ "$CURL_EXIT" -ne 0 ] && [ "$HTTP_CODE" = "000" ]; then
+              echo "Curl failed with exit code: $CURL_EXIT (network error)"
+              echo "Checking if port 3000 is listening..."
+              netstat -tuln | grep :3000 || echo "Port 3000 not listening"
+              docker compose logs app --tail=10
+            else
+              echo "App HTTP Code: $HTTP_CODE"
+            fi
             
             if [ "$HTTP_CODE" = "200" ]; then
               echo "App is responding with 200!"
-              break
+              exit 0
             fi
-            echo "App not ready, retrying..."
+            
+            echo "App not ready, retrying in 5 seconds..."
             sleep 5
           done
 
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "App failed to return 200"
-            exit 1
-          fi
+          echo "App failed to become ready after all retries"
+          docker compose logs app --tail=50
+          exit 1
 
       - name: Test websocket server homepage
         run: |
           cd docker
           echo "Testing websocket server homepage..."
           for i in {1..60}; do
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001)
-            echo "WebSocket server HTTP Code: $HTTP_CODE"
+            # Check if container is running first
+            if ! docker compose ps websocket-server | grep -q "running"; then
+              echo "WebSocket server container is not running!"
+              docker compose ps websocket-server
+              docker compose logs websocket-server --tail=20
+              sleep 5
+              continue
+            fi
+            
+            # Try to connect with curl, capture both response and exit code
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001 2>/dev/null || echo "000")
+            CURL_EXIT=$?
+            
+            if [ "$CURL_EXIT" -ne 0 ] && [ "$HTTP_CODE" = "000" ]; then
+              echo "Curl failed with exit code: $CURL_EXIT (network error)"
+              echo "Checking if port 3001 is listening..."
+              netstat -tuln | grep :3001 || echo "Port 3001 not listening"
+              docker compose logs websocket-server --tail=10
+            else
+              echo "WebSocket server HTTP Code: $HTTP_CODE"
+            fi
             
             if [ "$HTTP_CODE" = "200" ]; then
               echo "WebSocket server is responding with 200!"
-              break
+              exit 0
             fi
-            echo "WebSocket server not ready, retrying..."
+            
+            echo "WebSocket server not ready, retrying in 5 seconds..."
             sleep 5
           done
 
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "WebSocket server failed to return 200"
-            exit 1
-          fi
+          echo "WebSocket server failed to become ready after all retries"
+          docker compose logs websocket-server --tail=50
+          exit 1
 
       - name: Cleanup on failure
         if: failure()
@@ -185,9 +223,13 @@ jobs:
           cd docker
           echo "=== App logs ==="
           docker compose logs app --tail=100
+          echo "=== WebSocket server logs ==="
+          docker compose logs websocket-server --tail=50
           echo "=== PostgreSQL logs ==="
           docker compose logs postgres --tail=50
           echo "=== Kafka logs ==="
           docker compose logs kafka --tail=50
           echo "=== ClickHouse logs ==="
           docker compose logs clickhouse --tail=50
+          echo "=== All container status ==="
+          docker compose ps
