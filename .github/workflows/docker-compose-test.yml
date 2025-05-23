@@ -76,6 +76,9 @@ jobs:
           # MinIO Configuration
           MINIO_ROOT_USER=minioadmin
           MINIO_ROOT_PASSWORD=minioadmin
+
+          # Docker Registry (empty for Docker Hub)
+          DOCKER_REGISTRY_URL_PREFIX=
           EOF
 
       - name: Create MinIO bucket
@@ -143,7 +146,7 @@ jobs:
           echo "Testing app homepage..."
           for i in {1..60}; do
             # Check if container is running first
-            if ! docker compose ps app | grep -q "running"; then
+            if ! docker compose ps app | grep -q "Up"; then
               echo "App container is not running!"
               docker compose ps app
               docker compose logs app --tail=20
@@ -183,7 +186,7 @@ jobs:
           echo "Testing websocket server homepage..."
           for i in {1..60}; do
             # Check if container is running first
-            if ! docker compose ps websocket-server | grep -q "running"; then
+            if ! docker compose ps websocket-server | grep -q "Up"; then
               echo "WebSocket server container is not running!"
               docker compose ps websocket-server
               docker compose logs websocket-server --tail=20
