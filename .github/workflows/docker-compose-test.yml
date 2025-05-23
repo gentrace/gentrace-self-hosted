@@ -14,6 +14,9 @@ on:
       - "docker/**"
       - ".github/workflows/docker-compose-test.yml"
   workflow_dispatch:
+  # Run daily at midnight UTC
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
   test:
@@ -245,3 +248,36 @@ jobs:
           docker compose logs clickhouse --tail=50
           echo "=== All container status ==="
           docker compose ps
+
+  notify-slack:
+    needs: [test]
+    if: always() && failure()
+    name: Notify Docker Compose test failed to Slack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Map GitHub handle to Slack handle
+        id: map-handle
+        run: |
+          # Define a mapping from GitHub handle to your registered Slack email
+          declare -A handle_map=(
+            ["joshlebed"]="josh@gentrace.ai"
+            ["steventsao"]="steven@gentrace.ai"
+            ["viveknair"]="vivek@gentrace.ai"
+            ["dougsafreno"]="doug@gentrace.ai"
+          )
+          # Default to the GitHub handle if not found in the map
+          SLACK_HANDLE="${handle_map[${{ github.actor }}]:-${{ github.actor }}}"
+          echo "SLACK_HANDLE=$SLACK_HANDLE" >> $GITHUB_ENV
+
+      - name: Post Docker Compose test failed to Slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "channel": "github-builds",
+              "user": "${{ env.SLACK_HANDLE }}",
+              "message": "Docker Compose test failed in self-hosted repo: https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WORKFLOW_DOCKER_COMPOSE_TEST_FAILED }}
