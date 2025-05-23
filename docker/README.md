@@ -9,6 +9,7 @@ This directory contains everything you need to run Gentrace locally using Docker
 - Built-in monitoring with Kafka UI
 - Local file storage with MinIO
 - Automatic service discovery and networking
+- Automatic MinIO bucket creation and configuration
 
 ## Prerequisites
 
@@ -207,6 +208,22 @@ Reset all data and start fresh:
 docker compose down -v
 docker compose up -d
 ```
+
+### MinIO Bucket Issues
+
+If you encounter issues with image upload/download, check if the MinIO bucket was created properly:
+
+1. Check MinIO initialization logs:
+   ```bash
+   docker compose logs minio-init
+   ```
+
+2. Access MinIO console at http://localhost:9001 and verify the bucket exists
+
+3. If the bucket is missing, restart the services:
+   ```bash
+   docker compose restart minio-init app
+   ```
 
 ## Deployment notes
 
