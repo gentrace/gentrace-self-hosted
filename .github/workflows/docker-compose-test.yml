@@ -7,12 +7,22 @@ on:
     paths:
       - "docker/**"
       - ".github/workflows/docker-compose-test.yml"
+      - "test-ingestion-*.py"
+      - "test-ingestion-*.js"
+      - "run-ingestion-test.sh"
+      - "requirements-test.txt"
+      - "package.json"
   pull_request:
     branches:
       - main
     paths:
       - "docker/**"
       - ".github/workflows/docker-compose-test.yml"
+      - "test-ingestion-*.py"
+      - "test-ingestion-*.js"
+      - "run-ingestion-test.sh"
+      - "requirements-test.txt"
+      - "package.json"
   workflow_dispatch:
   # Run daily at midnight UTC
   schedule:
@@ -232,6 +242,57 @@ jobs:
           docker compose logs websocket-server --tail=50
           exit 1
 
+      - name: Set up Python for ingestion tests
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js for ingestion tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install ingestion test dependencies
+        run: |
+          # Install Python dependencies
+          pip install -r requirements-test.txt
+          
+          # Install Node.js dependencies
+          npm install
+
+      - name: Run OTEL ingestion pipeline tests
+        run: |
+          echo "Running comprehensive OTEL ingestion pipeline tests..."
+          
+          # Set environment variables for the test
+          export GENTRACE_BASE_URL="http://localhost:3000"
+          export POSTGRES_HOST="localhost"
+          export POSTGRES_PORT="5432"
+          export POSTGRES_DB="gentrace"
+          export POSTGRES_USER="gentrace"
+          export POSTGRES_PASSWORD="gentrace123"
+          export CLICKHOUSE_HOST="localhost"
+          export CLICKHOUSE_PORT="8123"
+          export CLICKHOUSE_DB="gentrace"
+          export CLICKHOUSE_USER="default"
+          export CLICKHOUSE_PASSWORD="gentrace123"
+          export GENTRACE_API_KEY="gt-test-$(date +%s)"
+          export ORGANIZATION_ID="test-org-$(date +%s)"
+          export PIPELINE_ID="test-pipeline-$(date +%s)"
+          
+          # Wait a bit more for all services to be fully ready
+          echo "Waiting for services to stabilize..."
+          sleep 15
+          
+          # Run both Python and Node.js ingestion tests
+          echo "Running Python ingestion test..."
+          python3 test-ingestion-pipeline.py
+          
+          echo "Running Node.js ingestion test..."
+          node test-ingestion-node.js
+          
+          echo "All ingestion tests passed successfully!"
+
       - name: Cleanup on failure
         if: failure()
         run: |
@@ -248,6 +309,18 @@ jobs:
           docker compose logs clickhouse --tail=50
           echo "=== All container status ==="
           docker compose ps
+          
+          # Also check if ingestion test files exist and show their status
+          cd ..
+          echo "=== Ingestion test files status ==="
+          ls -la test-ingestion-* requirements-test.txt package.json 2>/dev/null || echo "Ingestion test files not found"
+          
+          # Show recent database content for debugging
+          echo "=== Recent GTSpan records (if any) ==="
+          docker compose exec -T postgres psql -U gentrace -d gentrace -c "SELECT id, name, type, \"createdAt\" FROM \"GTSpan\" ORDER BY \"createdAt\" DESC LIMIT 5;" 2>/dev/null || echo "Could not query GTSpan table"
+          
+          echo "=== Recent ClickHouse span records (if any) ==="
+          curl -s "http://localhost:8123/?query=SELECT id, name, createdAt FROM span ORDER BY createdAt DESC LIMIT 5 FORMAT JSON" 2>/dev/null || echo "Could not query ClickHouse span table"
 
   notify-slack:
     needs: [test]
