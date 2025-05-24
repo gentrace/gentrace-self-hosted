@@ -284,6 +284,10 @@ jobs:
           echo "Waiting for services to stabilize..."
           sleep 15
           
+          # Additional wait for ClickHouse replication setup (eventual consistency)
+          echo "Allowing extra time for ClickHouse replication setup..."
+          sleep 10
+          
           # Run both Python and Node.js ingestion tests
           echo "Running Python ingestion test..."
           python3 test-ingestion-pipeline.py

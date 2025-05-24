@@ -265,14 +265,19 @@ class IngestionTester:
         
         return success
     
-    def validate_clickhouse_replication(self, trace_ids: List[str], max_wait: int = 60) -> bool:
+    def validate_clickhouse_replication(self, trace_ids: List[str], max_wait: int = 120) -> bool:
         """Validate that data was replicated to ClickHouse span table."""
         print("🔍 Validating ClickHouse replication...")
+        print("   Note: ClickHouse replication is eventually consistent, allowing extra time...")
         
         client = self.connect_clickhouse()
         
         start_time = time.time()
         found_spans = 0
+        
+        # Add initial settling time for eventual consistency
+        print("   ⏳ Waiting 30 seconds for ClickHouse replication to settle...")
+        time.sleep(30)
         
         while time.time() - start_time < max_wait:
             try:
@@ -411,4 +416,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

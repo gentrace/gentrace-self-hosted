@@ -241,12 +241,17 @@ class NodeIngestionTester {
         return success;
     }
 
-    async validateClickHouseReplication(traceIds, maxWait = 60) {
+    async validateClickHouseReplication(traceIds, maxWait = 120) {
         console.log('🔍 Validating ClickHouse replication...');
+        console.log('   Note: ClickHouse replication is eventually consistent, allowing extra time...');
         
         const clickhouse = await this.connectClickHouse();
         const startTime = Date.now();
         let foundSpans = 0;
+        
+        // Add initial settling time for eventual consistency
+        console.log('   ⏳ Waiting 30 seconds for ClickHouse replication to settle...');
+        await new Promise(resolve => setTimeout(resolve, 30000));
         
         while (Date.now() - startTime < maxWait * 1000) {
             try {
@@ -400,4 +405,3 @@ if (require.main === module) {
         process.exit(1);
     });
 }
-

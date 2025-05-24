@@ -105,6 +105,7 @@ export PIPELINE_ID="your-pipeline-id"
    - Data was replicated from Postgres
    - JSON fields are valid
    - Timestamps are correct
+   - **Note**: ClickHouse replication is eventually consistent, so the test waits up to 2 minutes with an initial 30-second settling period
 
 ### Expected Output
 
@@ -175,9 +176,10 @@ clickhouse-client --host localhost --port 9000 --queries-file validate-clickhous
    - Check for buffered spans that haven't been processed
 
 4. **No Data in ClickHouse**:
-   - Data replication may be asynchronous - wait longer
+   - Data replication may be asynchronous - wait longer (tests now wait up to 2 minutes)
    - Check task runner logs: `docker-compose logs taskrunner`
    - Verify ClickHouse connection from the app
+   - ClickHouse replication is eventually consistent and may take time to propagate
 
 ### Debug Commands
 
