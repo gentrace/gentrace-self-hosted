@@ -189,6 +189,24 @@ jobs:
           docker compose logs app --tail=50
           exit 1
 
+      - name: Test minimal seed data
+        run: |
+          cd docker
+          echo "Testing minimal seed data validation..."
+          
+          # Install dependencies for testing
+          npm install --silent
+          
+          # Run the seed data validation
+          npm run test-seed
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ Seed data validation passed!"
+          else
+            echo "❌ Seed data validation failed!"
+            exit 1
+          fi
+
       - name: Test websocket server homepage
         run: |
           cd docker
