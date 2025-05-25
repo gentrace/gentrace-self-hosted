@@ -189,6 +189,27 @@ jobs:
           docker compose logs app --tail=50
           exit 1
 
+      - name: Run minimal seed data
+        run: |
+          cd docker
+          echo "Running minimal seed data..."
+          
+          # Set up environment variables for the seed script
+          export DATABASE_URL="postgresql://gentrace:gentrace123@localhost:5432/gentrace"
+          
+          # Install dependencies for seeding
+          npm install --silent
+          
+          # Run the minimal seed script
+          npm run seed
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ Minimal seed data created successfully!"
+          else
+            echo "❌ Failed to create minimal seed data!"
+            exit 1
+          fi
+
       - name: Test minimal seed data
         run: |
           cd docker
