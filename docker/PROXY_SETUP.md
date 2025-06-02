@@ -76,8 +76,8 @@ This will pull:
 After configuring the proxy URLs:
 
 1. Update your `.env` file with the proxy settings
-2. Run `docker-compose pull` to test image pulling
-3. Start the stack with `docker-compose up -d`
+2. Run `docker compose pull` to test image pulling
+3. Start the stack with `docker compose up -d`
 
 If images fail to pull, verify:
 - Your proxy URLs are correct
@@ -126,4 +126,4 @@ If you encounter authentication errors:
 - **403 Forbidden**: Verify your account has access to pull from Quay.io and Docker Hub through the proxy
 - **Network errors**: Ensure your proxy is accessible and properly configured
 
-**Note**: Authentication is handled at the Docker daemon level, so once configured, it applies to all `docker pull` and `docker-compose` operations.
+**Note**: Authentication is handled at the Docker daemon level, so once configured, it applies to all `docker pull` and `docker compose` operations.
