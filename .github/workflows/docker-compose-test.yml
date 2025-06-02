@@ -16,7 +16,15 @@ on:
   workflow_dispatch:
   # Run daily at midnight UTC
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
+
+concurrency:
+  group: docker-compose-test
+  cancel-in-progress: true
+
+permissions:
+  contents: "read"
+  id-token: "write"
 
 jobs:
   test:
@@ -56,7 +64,7 @@ jobs:
           DATABASE_URL=postgresql://gentrace:gentrace123@postgres:5432/gentrace
 
           # ClickHouse Configuration
-          CLICKHOUSE_DATABASE=gentrace
+          CLICKHOUSE_DATABASE=default
           CLICKHOUSE_HOST=clickhouse
           CLICKHOUSE_PORT=8123
           CLICKHOUSE_PROTOCOL=http
@@ -135,6 +143,48 @@ jobs:
             echo "Kafka not ready, retrying..."
             sleep 2
           done
+
+      - name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: "projects/503559009755/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider"
+          service_account: "github-actions@gentrace.iam.gserviceaccount.com"
+
+      - name: "Set up Cloud SDK"
+        uses: google-github-actions/setup-gcloud@v1.1.0
+        with:
+          version: ">= 422.0.0"
+
+      - name: Download seed data from GCS
+        run: |
+          echo "Downloading seed data from GCS..."
+          gsutil cp gs://gentrace-seed-data/postgres_seed_data_latest.sql ./postgres_seed_data.sql
+          gsutil cp gs://gentrace-seed-data/clickhouse_seed_data_latest.sql ./clickhouse_seed_data.sql
+
+          echo "Seed files downloaded:"
+          ls -la *.sql
+
+      - name: Apply Postgres seed data
+        run: |
+          cd docker
+          echo "Applying Postgres seed data..."
+          docker compose exec -T postgres psql -U gentrace -d gentrace < ../postgres_seed_data.sql
+          echo "Postgres seed data applied successfully!"
+
+      - name: Apply ClickHouse seed data
+        run: |
+          cd docker
+          echo "Applying ClickHouse seed data..."
+          # Filter out any operations on _pg tables (PostgreSQL proxy tables)
+          # These are read-only proxies and should not receive inserts
+          grep -v "_pg" ../clickhouse_seed_data.sql > ../clickhouse_seed_filtered.sql || true
+
+          # Apply the filtered seed data
+          docker compose exec -T clickhouse clickhouse client --database=default --multiquery < ../clickhouse_seed_filtered.sql
+          echo "ClickHouse seed data applied successfully!"
+
+          # Clean up the filtered file
+          rm -f ../clickhouse_seed_filtered.sql
 
       - name: Check service status
         run: |
@@ -248,6 +298,27 @@ jobs:
           docker compose logs clickhouse --tail=50
           echo "=== All container status ==="
           docker compose ps
+
+          # Show recent database content for debugging
+          echo "=== Recent GTSpan records (if any) ==="
+          docker compose exec -T postgres psql -U gentrace -d gentrace -c "SELECT id, name, type, \"createdAt\" FROM \"GTSpan\" ORDER BY \"createdAt\" DESC LIMIT 5;" 2>/dev/null || echo "Could not query GTSpan table"
+
+          echo "=== Recent ClickHouse span records (if any) ==="
+          curl -s "http://localhost:8123/?query=SELECT id, name, createdAt FROM span ORDER BY createdAt DESC LIMIT 5 FORMAT JSON" 2>/dev/null || echo "Could not query ClickHouse span table"
+
+      - name: Final cleanup
+        if: always()
+        run: |
+          echo "=== Performing final cleanup ==="
+
+          # Clean up seed files
+          rm -f postgres_seed_data.sql clickhouse_seed_data.sql
+
+          # Stop and clean up Docker containers
+          cd docker
+          docker compose down -v || true
+
+          echo "Cleanup completed"
 
   notify-slack:
     needs: [test]
