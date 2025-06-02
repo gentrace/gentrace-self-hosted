@@ -21,7 +21,7 @@ import requests
 import psycopg2
 import clickhouse_driver
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
+from typing import List
 from dataclasses import dataclass
 
 # OpenTelemetry imports
@@ -237,11 +237,11 @@ class IngestionTester:
                         
                         # Validate required fields
                         if not start_time or not end_time:
-                            print(f"    ⚠️  Missing timestamps")
+                            print("    ⚠️  Missing timestamps")
                         if not attrs:
-                            print(f"    ⚠️  Missing attributes")
+                            print("    ⚠️  Missing attributes")
                         if otel_span == "null":
-                            print(f"    ⚠️  Missing sourceOtelSpan")
+                            print("    ⚠️  Missing sourceOtelSpan")
                         if pipeline_id != self.config.pipeline_id:
                             print(f"    ⚠️  Pipeline ID mismatch: {pipeline_id}")
                 
@@ -297,7 +297,6 @@ class IngestionTester:
                     ORDER BY createdAt DESC
                     LIMIT 50
                 """)
-                
                 found_spans = 0
                 for row in result:
                     span_id, name, inputs, outputs, start_time, end_time, metadata, run_id = row
@@ -311,16 +310,16 @@ class IngestionTester:
                         if inputs:
                             try:
                                 json.loads(inputs)
-                                print(f"    ✅ Valid inputs JSON")
+                                print("    ✅ Valid inputs JSON")
                             except:
-                                print(f"    ⚠️  Invalid inputs JSON")
+                                print("    ⚠️  Invalid inputs JSON")
                         
                         if outputs:
                             try:
                                 json.loads(outputs)
-                                print(f"    ✅ Valid outputs JSON")
+                                print("    ✅ Valid outputs JSON")
                             except:
-                                print(f"    ⚠️  Invalid outputs JSON")
+                                print("    ⚠️  Invalid outputs JSON")
                 
                 if found_spans > 0:
                     break
@@ -335,7 +334,7 @@ class IngestionTester:
         if success:
             print(f"✅ ClickHouse validation successful: {found_spans} spans found")
         else:
-            print(f"❌ ClickHouse validation failed: no spans found")
+            print("❌ ClickHouse validation failed: no spans found")
         
         return success
     
@@ -383,8 +382,8 @@ class IngestionTester:
         
         # Summary
         print("\n📊 Test Results Summary:")
-        print(f"   API Health: ✅")
-        print(f"   Trace Sending: ✅")
+        print("   API Health: ✅")
+        print("   Trace Sending: ✅")
         print(f"   Postgres Ingestion: {'✅' if postgres_success else '❌'}")
         print(f"   ClickHouse Replication: {'✅' if clickhouse_success else '❌'}")
         
