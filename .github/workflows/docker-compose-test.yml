@@ -70,6 +70,7 @@ jobs:
           CLICKHOUSE_PROTOCOL=http
           CLICKHOUSE_USER=default
           CLICKHOUSE_PASSWORD=gentrace123
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
 
           # Kafka Configuration
           CONNECT_BOOTSTRAP_SERVERS=kafka:9092
@@ -281,6 +282,51 @@ jobs:
           echo "WebSocket server failed to become ready after all retries"
           docker compose logs websocket-server --tail=50
           exit 1
+
+      - name: Install uv for Python tests
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Node.js for ingestion tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run OTEL ingestion pipeline tests
+        run: |
+          echo "Running comprehensive OTEL ingestion pipeline tests..."
+
+          # Set environment variables for the test
+          export GENTRACE_BASE_URL="http://localhost:3000/api"
+          export POSTGRES_HOST="localhost"
+          export POSTGRES_PORT="5432"
+          export POSTGRES_DB="gentrace"
+          export POSTGRES_USER="gentrace"
+          export POSTGRES_PASSWORD="gentrace123"
+          export CLICKHOUSE_HOST="localhost"
+          export CLICKHOUSE_PORT="8123"
+          export CLICKHOUSE_DB="default"
+          export CLICKHOUSE_USER="default"
+          export CLICKHOUSE_PASSWORD="gentrace123"
+          # The default API key is for testing only and is not a security concern.
+          export GENTRACE_API_KEY="gen_api_x6cPoAJR5Fb63xaTcUcYU1A64PDPUGlppkMDEL2J"
+          export ORGANIZATION_ID="test-org-$(date +%s)"
+          export PIPELINE_ID="c10408c7-abde-5c19-b339-e8b1087c9b64"
+
+          # Wait a bit more for all services to be fully ready
+          echo "Waiting for services to stabilize..."
+          sleep 15
+
+          # Additional wait for ClickHouse replication setup (eventual consistency)
+          echo "Allowing extra time for ClickHouse replication setup..."
+          sleep 10
+
+          # Run the ingestion tests
+          cd docker/ingestion-tests
+          ./run-tests.sh both
+
+          echo "All ingestion tests passed successfully!"
 
       - name: Cleanup on failure
         if: failure()

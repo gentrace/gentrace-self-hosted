@@ -1,0 +1,40 @@
+{
+  "name": "gentrace-ingestion-test",
+  "version": "1.0.0",
+  "description": "Test suite for Gentrace self-hosted ingestion pipeline",
+  "main": "test-ingestion-node.ts",
+  "scripts": {
+    "test": "tsx test-ingestion-node.ts"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.8.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.51.1",
+    "@opentelemetry/resources": "^1.24.1",
+    "@opentelemetry/sdk-node": "^0.51.1",
+    "@opentelemetry/sdk-trace-base": "^1.24.1",
+    "@opentelemetry/sdk-trace-node": "^1.24.1",
+    "@opentelemetry/semantic-conventions": "^1.24.1",
+    "axios": "^1.6.0",
+    "clickhouse": "^2.5.0",
+    "gentrace": "^0",
+    "pg": "^8.11.0",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "@types/pg": "^8.11.0",
+    "@types/pino": "^7.0.5",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "gentrace",
+    "opentelemetry",
+    "testing",
+    "ingestion",
+    "self-hosted"
+  ],
+  "author": "Gentrace",
+  "license": "MIT"
+}
