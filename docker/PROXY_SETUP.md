@@ -84,3 +84,46 @@ If images fail to pull, verify:
 - The proxy has access to both Quay.io and Docker Hub
 - Authentication is properly configured for your proxy
 
+## Authentication
+
+By default, both Quay.io and Docker Hub registry containers are **unauthenticated**. If your organization's proxy requires authentication to access these registries, you'll need to configure Docker authentication.
+
+### Setting Up Authentication
+
+If your proxy requires authentication, follow the [Docker login guide](https://docs.docker.com/reference/cli/docker/login/) to authenticate with your proxy registry:
+
+```bash
+# Authenticate with your proxy registry
+docker login your-proxy.company.com
+
+# Or specify credentials directly
+docker login your-proxy.company.com -u username -p password
+```
+
+### Authentication Methods
+
+1. **Interactive login** (recommended for development):
+   ```bash
+   docker login your-proxy.company.com
+   ```
+
+2. **Environment variables** (for CI/CD):
+   ```bash
+   export DOCKER_USERNAME=your-username
+   export DOCKER_PASSWORD=your-password
+   echo $DOCKER_PASSWORD | docker login your-proxy.company.com -u $DOCKER_USERNAME --password-stdin
+   ```
+
+3. **Docker config file** (persistent):
+   - Credentials are stored in `~/.docker/config.json` after successful login
+   - This file is automatically used for subsequent pulls
+
+### Troubleshooting Authentication
+
+If you encounter authentication errors:
+
+- **401 Unauthorized**: Check your credentials and ensure they're valid for the proxy
+- **403 Forbidden**: Verify your account has access to pull from Quay.io and Docker Hub through the proxy
+- **Network errors**: Ensure your proxy is accessible and properly configured
+
+**Note**: Authentication is handled at the Docker daemon level, so once configured, it applies to all `docker pull` and `docker-compose` operations.
