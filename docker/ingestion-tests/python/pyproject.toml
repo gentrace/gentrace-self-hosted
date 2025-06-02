@@ -1,0 +1,27 @@
+[project]
+name = "gentrace-ingestion-test"
+version = "0.1.0"
+description = "Test suite for Gentrace self-hosted ingestion pipeline"
+readme = "README.md"
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "gentrace-py==1.0.0a1",
+    "opentelemetry-api>=1.21.0",
+    "opentelemetry-sdk>=1.21.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.21.0",
+    "psycopg2-binary>=2.9.9",
+    "clickhouse-driver>=0.2.6",
+    "requests>=2.31.0",
+]
+
+[tool.uv]
+package = true
+dev-dependencies = [
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "types-requests>=2.31.0",
+]
+
+[project.scripts]
+test-ingestion = "test_ingestion_pipeline:main"
