@@ -1,4 +1,20 @@
 services:
+  # MinIO initialization service
+  minio-init:
+    image: ${DOCKER_REGISTRY_URL_PREFIX:+$DOCKER_REGISTRY_URL_PREFIX/}minio/mc:latest
+    entrypoint: /bin/sh
+    environment:
+      - STORAGE_ENDPOINT=${STORAGE_ENDPOINT}
+      - STORAGE_BUCKET=${STORAGE_BUCKET}
+      - STORAGE_ACCESS_KEY_ID=${STORAGE_ACCESS_KEY_ID}
+      - STORAGE_SECRET_ACCESS_KEY=${STORAGE_SECRET_ACCESS_KEY}
+    volumes:
+      - ./scripts/init-minio.sh:/init-minio.sh:ro
+    command: ["/init-minio.sh"]
+    depends_on:
+      minio:
+        condition: service_healthy
+
   app:
     platform: linux/amd64
     image: ${QUAY_IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
@@ -50,7 +66,9 @@ services:
       kafka:
         condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
 
   # Note: Routing to websocket-server is not yet configured from the app container. This
   # service will not be accessible externally.
@@ -224,9 +242,17 @@ services:
       # Change these values for production use
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      # Automatically create the bucket specified in STORAGE_BUCKET
+      - MINIO_DEFAULT_BUCKETS=${STORAGE_BUCKET}
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   clickhouse:
     image: ${DOCKER_REGISTRY_URL_PREFIX:+$DOCKER_REGISTRY_URL_PREFIX/}clickhouse/clickhouse-server:24.8
