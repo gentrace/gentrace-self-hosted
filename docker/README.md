@@ -87,13 +87,14 @@ The following tables list all required environment variables for each service:
 | POSTGRES_PASSWORD           | PostgreSQL password               | gentrace123                                              |
 | POSTGRES_USER               | PostgreSQL username               | gentrace                                                 |
 | PRISMA_FIELD_ENCRYPTION_KEY | Prisma field encryption key       | Generated from https://cloak.47ng.com/                   |
-| PUBLIC_HOSTNAME             | Public hostname for the service   | api.yourdomain.com                                       |
+| PUBLIC_HOSTNAME             | Public hostname for the service   | api.yourdomain.com (must include port for local setups) |
 | STORAGE_ACCESS_KEY_ID       | Object storage access key         | your-access-key                                          |
 | STORAGE_BUCKET              | Object storage bucket name        | gentrace-public                                          |
 | STORAGE_ENDPOINT            | Object storage endpoint URL       | https://storage.googleapis.com                           |
 | STORAGE_FORCE_PATH_STYLE    | Path style access setting         | true                                                     |
-| STORAGE_REGION              | Object storage region             | us-central1                                              |
+| STORAGE_REGION              | Object storage region                 | us-central1                                              |
 | STORAGE_SECRET_ACCESS_KEY   | Object storage secret key         | your-secret-key                                          |
+| WEBSOCKET_URL               | WebSocket server URL                  | http://localhost:3001 (default local setup)             |
 
 ### WebSocket Server
 
@@ -118,13 +119,14 @@ The following tables list all required environment variables for each service:
 | POSTGRES_PASSWORD           | PostgreSQL password                   | gentrace123                                              |
 | POSTGRES_USER               | PostgreSQL username                   | gentrace                                                 |
 | PRISMA_FIELD_ENCRYPTION_KEY | Prisma field encryption key           | Generated from https://cloak.47ng.com/                   |
-| PUBLIC_HOSTNAME             | Public hostname for WebSocket service | ws.yourdomain.com                                        |
+| PUBLIC_HOSTNAME             | Public hostname for WebSocket service | ws.yourdomain.com (must include port for local setups)  |
 | STORAGE_ACCESS_KEY_ID       | Object storage access key             | your-access-key                                          |
 | STORAGE_BUCKET              | Object storage bucket name            | gentrace-public                                          |
 | STORAGE_ENDPOINT            | Object storage endpoint URL           | https://storage.googleapis.com                           |
 | STORAGE_FORCE_PATH_STYLE    | Path style access setting             | true                                                     |
 | STORAGE_REGION              | Object storage region                 | us-central1                                              |
 | STORAGE_SECRET_ACCESS_KEY   | Object storage secret key             | your-secret-key                                          |
+| WEBSOCKET_URL               | WebSocket server URL                  | http://localhost:3001 (default local setup)             |
 
 ### Task Runner
 
