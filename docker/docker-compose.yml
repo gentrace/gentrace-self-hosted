@@ -70,8 +70,6 @@ services:
       minio-init:
         condition: service_completed_successfully
 
-  # Note: Routing to websocket-server is not yet configured from the app container. This
-  # service will not be accessible externally.
   websocket-server:
     platform: linux/amd64
     image: ${QUAY_IMAGE_URL_PREFIX:-quay.io}/gentrace/core:${GENTRACE_CORE_VERSION:-production}
