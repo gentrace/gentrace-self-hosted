@@ -378,7 +378,7 @@ jobs:
           # Define a mapping from GitHub handle to your registered Slack email
           declare -A handle_map=(
             ["joshlebed"]="josh@gentrace.ai"
-            ["steventsao"]="steven@gentrace.ai"
+            ["raissa"]="raissa@gentrace.ai"
             ["viveknair"]="vivek@gentrace.ai"
             ["dougsafreno"]="doug@gentrace.ai"
           )
