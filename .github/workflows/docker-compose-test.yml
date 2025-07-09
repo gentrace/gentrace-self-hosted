@@ -178,6 +178,10 @@ jobs:
           echo "Applying ClickHouse seed data..."
           # Filter out any operations on _pg tables (PostgreSQL proxy tables)
           # These are read-only proxies and should not receive inserts
+          # Also show what tables are being created for debugging
+          echo "=== Tables in ClickHouse seed data ==="
+          grep -i "CREATE TABLE" ../clickhouse_seed_data.sql || echo "No CREATE TABLE statements found"
+          
           grep -v "_pg" ../clickhouse_seed_data.sql > ../clickhouse_seed_filtered.sql || true
 
           # Apply the filtered seed data
@@ -186,6 +190,14 @@ jobs:
 
           # Clean up the filtered file
           rm -f ../clickhouse_seed_filtered.sql
+          
+          # Debug: List all tables in ClickHouse after seeding
+          echo "=== ClickHouse tables after seed data ==="
+          docker compose exec -T clickhouse clickhouse client --database=default --query "SHOW TABLES" || echo "Failed to list tables"
+          
+          # Check if GTSpan table exists
+          echo "=== Checking for GTSpan table ==="
+          docker compose exec -T clickhouse clickhouse client --database=default --query "EXISTS TABLE GTSpan" || echo "GTSpan table check failed"
 
       - name: Check service status
         run: |
@@ -321,6 +333,12 @@ jobs:
           # Additional wait for ClickHouse replication setup (eventual consistency)
           echo "Allowing extra time for ClickHouse replication setup..."
           sleep 10
+          
+          # Ensure ClickHouse tables are properly set up
+          echo "=== Ensuring ClickHouse tables are ready ==="
+          cd docker
+          ./scripts/ensure-clickhouse-tables.sh
+          cd ..
 
           # Run the ingestion tests
           cd docker/ingestion-tests
