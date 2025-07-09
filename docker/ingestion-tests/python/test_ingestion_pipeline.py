@@ -322,7 +322,7 @@ class IngestionTester:
         return success
     
     def validate_clickhouse_replication(self, trace_ids: List[str], max_wait: int = 120) -> bool:
-        """Validate that data was replicated to ClickHouse GTSpan table."""
+        """Validate that data was replicated to ClickHouse span table."""
         print("🔍 Validating ClickHouse replication...")
         print("   Note: ClickHouse replication is eventually consistent, allowing extra time...")
         
@@ -347,7 +347,7 @@ class IngestionTester:
                         attributesMap,
                         traceId,
                         pipelineId
-                    FROM GTSpan 
+                    FROM span 
                     WHERE pipelineId = '{self.config.pipeline_id}'
                     ORDER BY createdAt DESC
                     LIMIT 50

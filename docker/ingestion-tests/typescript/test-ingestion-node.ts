@@ -457,7 +457,7 @@ class NodeIngestionTester {
                         attributesMap,
                         traceId,
                         pipelineId
-                    FROM GTSpan 
+                    FROM span 
                     WHERE pipelineId = '${config.pipelineId}'
                     ORDER BY createdAt DESC
                     LIMIT 50
