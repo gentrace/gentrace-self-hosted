@@ -46,7 +46,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - PRISMA_FIELD_ENCRYPTION_KEY=${PRISMA_FIELD_ENCRYPTION_KEY}
       - WEBSOCKET_URL=${WEBSOCKET_URL}
-      - NODE_TLS_REJECT_UNAUTHORIZED="0"
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
 
       # Fake URL to ensure that Prisma doesn't try to download binaries
       - PRISMA_BINARIES_MIRROR=http://localhost:1
